@@ -8,5 +8,11 @@ services:
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     volumes:
-      - ./data:/app/data   # db.json, users.json, pdfs/ — persistant, jamais écrasé par une image rebuild
+      # Volume Docker nommé — géré par Docker, indépendant du répertoire de
+      # checkout du dépôt (que Coolify peut recréer à chaque déploiement).
+      # Persiste tant que la ressource/le volume n'est pas supprimé explicitement.
+      - tig-data:/app/data
     restart: always
+
+volumes:
+  tig-data:
