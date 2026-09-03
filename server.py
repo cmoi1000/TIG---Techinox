@@ -278,7 +278,7 @@ class Handler(BaseHTTPRequestHandler):
 
             anthro_req_body = json.dumps({
                 'model': model,
-                'max_tokens': 4096,
+                'max_tokens': 8192,  # marge pour les factures à nombreuses lignes — évite une réponse JSON tronquée
                 'messages': [{
                     'role': 'user',
                     'content': [

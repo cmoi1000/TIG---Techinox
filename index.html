@@ -1607,11 +1607,22 @@ Règles impératives :
   const data = await resp.json();
   const text = data.content?.[0]?.text || '';
 
+  if (!text) {
+    throw new Error('Réponse vide de Claude — le PDF est peut-être illisible, protégé ou trop volumineux.');
+  }
+
   // Extract JSON (handle markdown code blocks)
   const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) || text.match(/(\{[\s\S]*\})/);
   const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : text.trim();
 
-  return JSON.parse(jsonStr);
+  try {
+    return JSON.parse(jsonStr);
+  } catch (e) {
+    if (data.stop_reason === 'max_tokens') {
+      throw new Error('La facture contient trop de lignes pour être extraite en une fois (réponse coupée). Essayez de la scinder en plusieurs PDF plus courts.');
+    }
+    throw new Error('Réponse de Claude illisible (JSON invalide) — réessayez, ou scindez la facture si elle est très longue.');
+  }
 }
 
 function dedupLines(lignes) {
@@ -1774,7 +1785,7 @@ function renderImportReview(matches) {
 
   const arts = db.articles;
   const artOptions = arts.map(a =>
-    `<option value="${a.id}">${esc(a.famille)} — ${esc(a.section)} (${esc(a.matiere)})</option>`
+    `<option value="${a.id}">${a.code ? '[' + esc(a.code) + '] ' : ''}${esc(a.famille)} — ${esc(a.section)} (${esc(a.matiere)})</option>`
   ).join('');
 
   let html = '';
