@@ -1,0 +1,7 @@
+# Remplacez par votre nom de domaine réel (pointé en DNS vers ce serveur) avant
+# de déployer. Caddy obtient et renouvelle automatiquement le certificat HTTPS
+# (Let's Encrypt) dès que le domaine est joignable sur les ports 80/443.
+votre-domaine.fr {
+	reverse_proxy techinox-gestion:3210
+	encode gzip
+}

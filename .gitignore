@@ -1,0 +1,10 @@
+# Données runtime — jamais versionnées (hashs de mots de passe, factures PDF
+# clients, sauvegardes locales). Le code ne connaît jamais de clé API en clair :
+# ANTHROPIC_API_KEY vit uniquement dans .env / les secrets du serveur.
+data/
+
+# Secrets de déploiement (clé API, etc.) — voir .env.example pour le modèle
+.env
+
+__pycache__/
+*.pyc

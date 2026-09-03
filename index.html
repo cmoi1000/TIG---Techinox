@@ -1,0 +1,2923 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TIG — Tech Inox Gestion</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999}
+#login-screen.hidden{display:none}
+.login-card{background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,.15);padding:40px 36px;width:340px;max-width:94vw}
+.login-logo{font-size:22px;font-weight:800;color:var(--primary);text-align:center;margin-bottom:6px}
+.login-sub{font-size:12px;color:var(--text3);text-align:center;margin-bottom:28px}
+.login-card .form-group{margin-bottom:16px}
+.login-card label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.login-card input{width:100%;padding:10px 13px;border:1px solid var(--border);border-radius:6px;font-size:14px}
+.login-card input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(21,101,192,.1)}
+.login-err{color:var(--danger);font-size:12px;margin-top:10px;text-align:center;min-height:18px}
+#login-btn{width:100%;margin-top:8px;padding:11px}
+:root {
+  --bg: #f0f2f5;
+  --surface: #ffffff;
+  --surface2: #f8f9fa;
+  --border: #e0e0e0;
+  --text: #1a1a2e;
+  --text2: #555;
+  --text3: #999;
+  --primary: #1565c0;
+  --primary-light: #e3f2fd;
+  --success: #2e7d32;
+  --success-light: #e8f5e9;
+  --warn: #e65100;
+  --warn-light: #fff8e1;
+  --danger: #c62828;
+  --danger-light: #ffebee;
+  --header: #1a1a2e;
+  --radius: 8px;
+  --shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+/* HEADER */
+.app-header{background:var(--header);color:#fff;padding:0 24px;height:52px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+.app-logo{font-size:17px;font-weight:700;color:#4fc3f7;white-space:nowrap;margin-right:12px}
+.app-logo span{color:#90caf9;font-weight:400}
+.tabs{display:flex;gap:2px;flex:1}
+.tab-btn{padding:6px 16px;cursor:pointer;border-radius:4px;color:#90a0b0;background:none;border:none;font-size:13px;font-weight:500;transition:all .15s;white-space:nowrap}
+.tab-btn:hover{color:#fff;background:rgba(255,255,255,0.1)}
+.tab-btn.active{color:#fff;background:rgba(79,195,247,0.2);border-bottom:2px solid #4fc3f7}
+.header-badge{background:#c62828;color:#fff;border-radius:12px;padding:1px 7px;font-size:11px;font-weight:700}
+/* CONTENT */
+.content{padding:20px;max-width:1600px;margin:0 auto}
+.panel{display:none}.panel.active{display:block}
+/* CARDS */
+.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:16px}
+.card-title{font-size:15px;font-weight:700;margin-bottom:14px;color:var(--text);display:flex;align-items:center;gap:8px}
+/* FILTERS */
+.filter-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.filter-bar select,.filter-bar input{padding:7px 11px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:#fff;height:34px}
+.filter-bar select:focus,.filter-bar input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(21,101,192,.1)}
+/* TABLES */
+.table-wrap{overflow-x:auto;overflow-y:auto;max-height:calc(100vh - 220px);border-radius:6px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{position:sticky;top:0;z-index:2}
+th{background:var(--surface2);padding:9px 12px;text-align:left;font-weight:600;color:var(--text2);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+th:hover{background:#eef0f3}
+th .sort-icon{opacity:.4;margin-left:4px;font-size:11px}
+th.sorted .sort-icon{opacity:1;color:var(--primary)}
+td{padding:7px 12px;border-bottom:1px solid #f4f4f4;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafbff}
+.tr-section td{background:#eef2f8;font-weight:700;font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:#445;padding:5px 12px;border-bottom:1px solid #d8dde8}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;line-height:1}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover:not(:disabled){background:#1251a3}
+.btn-success{background:var(--success);color:#fff}
+.btn-success:hover:not(:disabled){background:#246427}
+.btn-warn{background:#f57c00;color:#fff}
+.btn-warn:hover:not(:disabled){background:#e06900}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover:not(:disabled){background:#a81f1f}
+.btn-ghost{background:transparent;color:var(--primary);border:1px solid var(--primary)}
+.btn-ghost:hover{background:var(--primary-light)}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn-xs{padding:2px 8px;font-size:11px}
+/* BADGES */
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;white-space:nowrap}
+.badge-green{background:var(--success-light);color:var(--success)}
+.badge-yellow{background:var(--warn-light);color:var(--warn)}
+.badge-red{background:var(--danger-light);color:var(--danger)}
+.badge-blue{background:var(--primary-light);color:var(--primary)}
+.badge-grey{background:#f0f0f0;color:#666}
+/* UPLOAD ZONE */
+.upload-zone{border:2px dashed #b0bec5;border-radius:12px;padding:40px 24px;text-align:center;cursor:pointer;transition:all .2s;background:#fafbfc}
+.upload-zone:hover,.upload-zone.drag-over{border-color:var(--primary);background:var(--primary-light)}
+.upload-zone .uz-icon{font-size:48px;margin-bottom:12px;opacity:.5}
+.upload-zone p{color:var(--text2);margin:4px 0}
+.upload-zone small{color:var(--text3)}
+/* EDITABLE CELLS */
+.editable-val{cursor:pointer;color:var(--primary);border-bottom:1px dashed var(--primary);padding:1px 4px;border-radius:2px}
+.editable-val:hover{background:var(--primary-light)}
+.editable-val.empty{color:var(--text3);border-bottom:1px dashed var(--text3)}
+.inline-edit{width:80px;padding:3px 6px;border:1px solid var(--primary);border-radius:4px;font-size:13px;text-align:right}
+/* STATUS DOTS */
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot-green{background:#4caf50}
+.dot-yellow{background:#ff9800}
+.dot-red{background:#f44336}
+.dot-grey{background:#bdbdbd}
+/* PRICE CELLS */
+.price-cell{font-family:'Courier New',monospace;text-align:right;font-weight:600}
+.price-fresh{color:var(--success)}
+.price-old{color:var(--warn)}
+.price-null{color:var(--text3);font-style:italic;font-weight:400;font-family:inherit}
+/* ALERT */
+.alert{padding:11px 16px;border-radius:6px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;font-size:13px}
+.alert-warn{background:var(--warn-light);border:1px solid #ffcc80;color:#bf360c}
+.alert-info{background:var(--primary-light);border:1px solid #90caf9;color:var(--primary)}
+.alert-success{background:var(--success-light);border:1px solid #a5d6a7;color:var(--success)}
+/* TOAST */
+#toasts{position:fixed;top:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{padding:11px 18px;border-radius:8px;color:#fff;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.25);animation:toastIn .25s ease;pointer-events:auto;max-width:360px}
+.toast-ok{background:#2e7d32}
+.toast-err{background:#c62828}
+.toast-info{background:#1565c0}
+@keyframes toastIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+/* MODAL */
+#modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;align-items:center;justify-content:center}
+#modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:24px;max-width:640px;width:95%;max-height:88vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.25)}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+/* FORM */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(21,101,192,.1)}
+.form-hint{font-size:11px;color:var(--text3);margin-top:3px}
+/* SPINNER */
+.spinner{width:36px;height:36px;border:3px solid var(--primary-light);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;margin:20px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* PROGRESS */
+.progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin:8px 0}
+.progress-fill{height:100%;background:var(--primary);transition:width .3s}
+/* IMPORT REVIEW TABLE */
+.match-ok td:first-child{border-left:3px solid #4caf50}
+.match-partial td:first-child{border-left:3px solid #ff9800}
+.match-none td:first-child{border-left:3px solid #f44336}
+/* STATS ROW */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);text-align:center}
+.stat-card .stat-val{font-size:24px;font-weight:700;color:var(--primary)}
+.stat-card .stat-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+/* HISTORY CHART (mini sparkline-like) */
+.mini-history{display:flex;gap:2px;align-items:flex-end;height:20px}
+.mini-bar{background:var(--primary-light);width:4px;border-radius:1px;min-height:2px}
+/* SPLIT */
+.split-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.split-2{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}}
+/* MISC */
+.sep{border:none;border-top:1px solid var(--border);margin:16px 0}
+.text-right{text-align:right}
+.text-center{text-align:center}
+.nowrap{white-space:nowrap}
+.mono{font-family:'Courier New',monospace}
+.muted{color:var(--text3)}
+.bold{font-weight:700}
+.flex{display:flex;align-items:center;gap:8px}
+.flex-between{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.flex-wrap{flex-wrap:wrap}
+.gap-4{gap:4px}
+/* COEF LEGEND */
+.legend{font-size:12px;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 14px;margin-bottom:10px}
+.legend b{color:var(--text)}
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:48px 20px;color:var(--text3)}
+.empty-state .es-icon{font-size:48px;margin-bottom:12px;opacity:.4}
+.empty-state p{font-size:15px}
+/* COLUMN FILTERS ROW */
+.filter-row th{background:#e8edf5;padding:4px 6px;border-bottom:2px solid var(--border);cursor:default}
+.filter-row th:hover{background:#e8edf5}
+.col-filter{width:100%;padding:3px 7px;border:1px solid #bcc8dc;border-radius:4px;font-size:11px;background:#fff;color:var(--text);height:26px}
+.col-filter:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(21,101,192,.12)}
+.col-filter::placeholder{color:#bbb}
+.col-filter-range{display:flex;gap:2px}
+.col-filter-range .col-filter{width:50%}
+/* ACTIVE FILTER HIGHLIGHT */
+th.has-filter{background:#dce8f8 !important}
+th.has-filter .sort-icon{color:var(--primary);opacity:1}
+/* AIDE ACCORDÉON */
+.help-intro{background:var(--primary-light);border:1px solid #90caf9;border-radius:8px;padding:14px 16px;margin-bottom:18px;font-size:13px;line-height:1.6;color:var(--text)}
+.help-intro strong{color:var(--primary)}
+.accordion{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:8px}
+.accordion-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;background:var(--surface2);font-weight:600;font-size:13px;user-select:none;transition:background .15s}
+.accordion-header:hover{background:#eef0f3}
+.accordion-header .acc-icon{font-size:16px;margin-right:8px}
+.accordion-chevron{transition:transform .25s;font-size:12px;color:var(--text3)}
+.accordion-body{display:none;padding:14px 16px;font-size:13px;line-height:1.7;color:var(--text2);border-top:1px solid var(--border);background:#fff}
+.accordion-body.open{display:block}
+.accordion-body ul{margin:6px 0 6px 18px}
+.accordion-body li{margin-bottom:4px}
+.accordion-body .tip{background:var(--warn-light);border-left:3px solid var(--warn);padding:8px 12px;border-radius:0 6px 6px 0;margin-top:10px;font-size:12px}
+.accordion-body .note{background:var(--success-light);border-left:3px solid var(--success);padding:8px 12px;border-radius:0 6px 6px 0;margin-top:10px;font-size:12px}
+.help-btn{background:none;border:1px solid #90a0b0;color:#90a0b0;border-radius:50%;width:26px;height:26px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.help-btn:hover{background:rgba(255,255,255,0.15);color:#fff;border-color:#fff}
+/* SCROLLBAR */
+::-webkit-scrollbar{width:7px;height:7px}
+::-webkit-scrollbar-track{background:#f1f1f1}
+::-webkit-scrollbar-thumb{background:#c0c0c0;border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:#a0a0a0}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+/* Tablette (≤ 1024px) */
+@media(max-width:1024px){
+  .content{padding:14px}
+  .table-wrap{max-height:calc(100vh - 200px)}
+}
+
+/* Mobile (≤ 768px) */
+@media(max-width:768px){
+  /* Header */
+  .app-header{padding:0 12px;height:auto;flex-wrap:wrap;gap:0}
+  .app-logo{font-size:15px;padding:10px 0 6px;width:auto}
+  .app-logo span{display:none} /* masque "Tech Inox Gestion" */
+  .tabs{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;flex:none;width:100%;gap:0;padding-bottom:4px;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab-btn{padding:5px 11px;font-size:12px;white-space:nowrap;flex-shrink:0}
+  #header-user{display:none} /* masqué sur mobile, trop serré */
+  .btn.btn-ghost.btn-sm[onclick="doLogout()"]{font-size:11px;padding:4px 8px}
+
+  /* Header user row */
+  .app-header > div[style*="margin-left:auto"]{padding:6px 0;order:3}
+
+  /* Contenu */
+  .content{padding:10px}
+  .card{padding:12px}
+
+  /* Tableaux */
+  .table-wrap{max-height:calc(100vh - 180px)}
+  table{font-size:12px}
+  th,td{padding:6px 8px}
+
+  /* Filtres */
+  .filter-bar{gap:6px}
+  .filter-bar select,.filter-bar input{font-size:12px;padding:5px 8px;height:30px}
+  .btn{font-size:12px;padding:6px 10px}
+
+  /* Stats */
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .stat-card .stat-val{font-size:20px}
+
+  /* Formulaires */
+  .form-row{grid-template-columns:1fr}
+  .modal{padding:16px;width:98%}
+  .modal-footer{flex-direction:column}
+  .modal-footer .btn{width:100%;justify-content:center}
+
+  /* Split */
+  .split-2{grid-template-columns:1fr}
+
+  /* Upload */
+  .upload-zone{padding:24px 12px}
+  .upload-zone .uz-icon{font-size:36px}
+
+  /* Login */
+  .login-card{padding:28px 20px;width:100%;max-width:360px}
+}
+
+/* Très petit mobile (≤ 400px) */
+@media(max-width:400px){
+  .tab-btn{padding:5px 8px;font-size:11px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  th,td{padding:5px 6px}
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<!-- ÉCRAN DE LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">TIG</div>
+    <div class="login-sub">Tech Inox Gestion · Techinox SARL</div>
+    <div class="form-group">
+      <label>Identifiant</label>
+      <input type="text" id="login-user" placeholder="admin" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('login-pwd').focus()">
+    </div>
+    <div class="form-group">
+      <label>Mot de passe</label>
+      <input type="password" id="login-pwd" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn btn-primary" id="login-btn" onclick="doLogin()">Se connecter</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<header class="app-header">
+  <div class="app-logo">TIG<span style="font-size:11px;font-weight:400;opacity:.7;margin-left:6px;letter-spacing:.5px">Tech Inox Gestion</span></div>
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="showPanel('tarifs',this)">📋 Tableau Tarifs</button>
+    <button class="tab-btn" onclick="showPanel('import',this)">📄 Importer Facture</button>
+    <button class="tab-btn" onclick="showPanel('import-produits',this)">📦 Import Produits</button>
+    <button class="tab-btn" onclick="showPanel('correspondances',this)">🔗 Correspondances</button>
+    <button class="tab-btn" onclick="showPanel('historique',this)">📈 Historique</button>
+    <button class="tab-btn" id="tab-settings" onclick="showPanel('settings',this)">⚙️ Paramètres</button>
+  </nav>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+    <span id="header-user" style="font-size:12px;color:#90a0b0"></span>
+    <button class="help-btn" onclick="openHelp()" title="Aide">?</button>
+    <button class="btn btn-ghost btn-sm" onclick="doLogout()" style="color:#90a0b0;border-color:#90a0b0;font-size:12px">Déconnexion</button>
+  </div>
+</header>
+
+<div id="toasts"></div>
+
+<!-- ===== MODAL ===== -->
+<div id="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<div class="content">
+
+<!-- ============================= PANEL: TARIFS ============================= -->
+<div id="panel-tarifs" class="panel active">
+  <div id="no-api-warn" class="alert alert-warn" style="display:none">
+    ⚠️ <span>Clé API Claude non configurée sur le serveur — l'extraction automatique de factures est indisponible (un administrateur doit définir <code>ANTHROPIC_API_KEY</code>).</span>
+  </div>
+
+  <div class="flex-between flex-wrap" style="margin-bottom:14px">
+    <div class="filter-bar" style="margin-bottom:0">
+      <select id="f-famille" onchange="renderTarifs()"><option value="">— Toutes familles —</option></select>
+      <select id="f-matiere" onchange="renderTarifs()"><option value="">— Toutes matières —</option></select>
+      <input id="f-search" type="text" placeholder="🔍 Recherche dimension..." oninput="renderTarifs()" style="width:200px">
+      <select id="f-status" onchange="renderTarifs()">
+        <option value="">Tous les statuts</option>
+        <option value="updated">Prix mis à jour</option>
+        <option value="missing_coef">Sans coefficient</option>
+        <option value="no_invoice">Jamais facturé</option>
+      </select>
+    </div>
+    <div class="flex gap-4">
+      <button class="btn btn-ghost btn-sm" onclick="exportCSV()">⬇ Export CSV</button>
+      <button class="btn btn-ghost btn-sm" style="color:#1b5e20;border-color:#388e3c" onclick="exportXLSX()">⬇ Export Excel</button>
+      <button class="btn btn-primary btn-sm" onclick="openAddArticle()">+ Article</button>
+    </div>
+  </div>
+
+  <div class="stats-grid" id="tarifs-stats"></div>
+
+  <div class="legend">
+    <b>Coef conv.</b> = unités fournisseur par unité nomenclature.
+    Formule : <b>Prix nomen. = Prix fourn. × Coef</b>
+    &nbsp;|&nbsp; Ex : cornière 30×30×3 → 1,4 kg/m → coef = <b>1,4</b> (si fourn. facture au kg)
+    &nbsp;|&nbsp; Tôle 2mm → 16 kg/m² → coef = <b>16</b>
+    &nbsp;|&nbsp; Barre 6m → coef = <b>0,167</b> (1 barre = 6 m)
+  </div>
+
+  <div class="table-wrap">
+    <table id="tarifs-table">
+      <thead>
+        <tr>
+          <th onclick="sortTarifs('famille')">Famille <span class="sort-icon">↕</span></th>
+          <th onclick="sortTarifs('matiere')">Matière <span class="sort-icon">↕</span></th>
+          <th onclick="sortTarifs('section')">Dimension caractéristique <span class="sort-icon">↕</span></th>
+          <th>Unité<br>Nomen.</th>
+          <th onclick="sortTarifs('_prix_calc')" class="text-right">Prix calc.<br><small class="muted">€/unité nomen.</small></th>
+          <th>Unité<br>Fourn.</th>
+          <th class="text-right">Coef<br><small class="muted">fourn/nomen</small></th>
+          <th onclick="sortTarifs('prix_fourn')" class="text-right">Prix Fourn.<br><small class="muted">€ (dernière facture)</small></th>
+          <th>Dernier<br>Fournisseur</th>
+          <th onclick="sortTarifs('derniere_date')">MAJ <span class="sort-icon">↕</span></th>
+          <th>Statut</th>
+          <th style="text-align:center"><button class="btn btn-xs" onclick="clearColFilters()" title="Effacer tous les filtres colonnes" style="background:#e0e0e0;color:#555;font-size:10px;padding:2px 7px">✕ Filtres</button></th>
+        </tr>
+        <tr class="filter-row" id="filter-row">
+          <th><select id="cf-famille" class="col-filter" onchange="renderTarifs()"><option value="">Toutes</option></select></th>
+          <th><select id="cf-matiere" class="col-filter" onchange="renderTarifs()"><option value="">Toutes</option></select></th>
+          <th><input id="cf-section" class="col-filter" type="text" placeholder="Filtrer dimension..." oninput="renderTarifs()"></th>
+          <th><select id="cf-unite-nomen" class="col-filter" onchange="renderTarifs()">
+            <option value="">Toutes</option>
+            <option value="M">M</option><option value="M2">M2</option>
+            <option value="U">U</option><option value="KG">KG</option>
+          </select></th>
+          <th><div class="col-filter-range">
+            <input id="cf-prix-min" class="col-filter" type="number" placeholder="≥" min="0" step="0.01" oninput="renderTarifs()" title="Prix minimum">
+            <input id="cf-prix-max" class="col-filter" type="number" placeholder="≤" min="0" step="0.01" oninput="renderTarifs()" title="Prix maximum">
+          </div></th>
+          <th><select id="cf-unite-fourn" class="col-filter" onchange="renderTarifs()">
+            <option value="">Toutes</option>
+            <option value="ML">ML</option><option value="KG">KG</option>
+            <option value="BA">BA</option><option value="FE">FE</option>
+            <option value="M2">M2</option><option value="U">U</option>
+          </select></th>
+          <th><select id="cf-coef" class="col-filter" onchange="renderTarifs()">
+            <option value="">Tous</option>
+            <option value="no">Sans coef</option>
+            <option value="needs">⚠ Prix sans coef</option>
+          </select></th>
+          <th><div class="col-filter-range">
+            <input id="cf-pf-min" class="col-filter" type="number" placeholder="≥" min="0" step="0.01" oninput="renderTarifs()" title="Prix fourn. minimum">
+            <input id="cf-pf-max" class="col-filter" type="number" placeholder="≤" min="0" step="0.01" oninput="renderTarifs()" title="Prix fourn. maximum">
+          </div></th>
+          <th><select id="cf-fourn" class="col-filter" onchange="renderTarifs()"><option value="">Tous</option></select></th>
+          <th><select id="cf-maj" class="col-filter" onchange="renderTarifs()">
+            <option value="">Toutes</option>
+            <option value="recent">&lt; 90 jours</option>
+            <option value="year">&lt; 1 an</option>
+            <option value="old">&gt; 1 an</option>
+            <option value="never">Jamais</option>
+          </select></th>
+          <th><select id="cf-statut" class="col-filter" onchange="renderTarifs()">
+            <option value="">Tous</option>
+            <option value="recent">Récent</option>
+            <option value="warn">À vérifier</option>
+            <option value="old">Ancien</option>
+            <option value="never">Sans facture</option>
+          </select></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tarifs-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============================= PANEL: IMPORT ============================= -->
+<div id="panel-import" class="panel">
+  <div class="split-2" style="align-items:start">
+    <div>
+      <div class="card">
+        <div class="card-title">📤 Importer une facture fournisseur</div>
+        <div id="upload-zone" class="upload-zone" onclick="document.getElementById('file-input').click()"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="handleDrop(event)">
+          <div class="uz-icon">📄</div>
+          <p><b>Glisser-déposer un PDF ici</b></p>
+          <p>ou cliquer pour sélectionner</p>
+          <small>Format PDF uniquement — Extraction automatique par Claude AI</small>
+        </div>
+        <input type="file" id="file-input" accept=".pdf" style="display:none" onchange="handleFileSelect(event)">
+      </div>
+
+      <div class="card" id="import-info" style="display:none">
+        <div class="card-title">📋 Facture détectée</div>
+        <table style="font-size:13px">
+          <tr><td class="muted" style="padding:3px 8px 3px 0">Fournisseur</td><td id="inf-fourn" class="bold"></td></tr>
+          <tr><td class="muted" style="padding:3px 8px 3px 0">N° Facture</td><td id="inf-num" class="bold mono"></td></tr>
+          <tr><td class="muted" style="padding:3px 8px 3px 0">Date facture</td><td><input type="date" id="inf-date" style="font-size:13px;padding:2px 4px"></td></tr>
+          <tr><td class="muted" style="padding:3px 8px 3px 0">Total HT</td><td id="inf-total" class="bold price-cell"></td></tr>
+          <tr><td class="muted" style="padding:3px 8px 3px 0">Lignes</td><td id="inf-lines"></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" id="import-status-card">
+        <div class="card-title">ℹ️ Statut</div>
+        <div id="import-status-msg" class="muted">En attente d'un fichier PDF...</div>
+        <div id="import-spinner" style="display:none"><div class="spinner"></div><p class="text-center muted" style="margin-top:-10px">Extraction par Claude AI en cours...</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="import-review" style="display:none">
+    <div class="flex-between" style="margin-bottom:12px">
+      <div>
+        <h3 style="font-size:15px;font-weight:700">Revue des lignes extraites</h3>
+        <p class="muted" style="font-size:12px;margin-top:2px">Vérifiez les correspondances avant d'importer. Cliquez sur une ligne pour modifier.</p>
+      </div>
+      <div class="flex gap-4">
+        <div class="flex gap-4" style="font-size:12px;align-items:center">
+          <span><span class="dot dot-green"></span> Correspondance OK</span>
+          <span><span class="dot dot-yellow"></span> Partielle</span>
+          <span><span class="dot dot-red"></span> Non trouvé</span>
+        </div>
+        <button class="btn btn-ghost" onclick="cancelImport()" style="color:var(--danger);border-color:var(--danger)">✕ Annuler l'import</button>
+        <button class="btn btn-success" onclick="confirmImport()" id="btn-confirm-import">✔ Confirmer l'import</button>
+      </div>
+    </div>
+
+    <div class="alert alert-warn" id="import-unmatched-alert" style="display:none">
+      ⚠️ <span id="import-unmatched-msg"></span>
+    </div>
+
+    <div class="table-wrap" style="max-height:50vh">
+      <table>
+        <thead>
+          <tr>
+            <th>Désignation (facture)</th>
+            <th class="text-right">Qté</th>
+            <th>Unité</th>
+            <th class="text-right">Prix unit. (€)</th>
+            <th class="text-right">Montant (€)</th>
+            <th>Correspondance interne</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="import-review-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============================= PANEL: IMPORT PRODUITS ============================= -->
+<div id="panel-import-produits" class="panel">
+  <div class="split-2" style="align-items:start">
+    <div>
+      <div class="card">
+        <div class="card-title">📦 Importer un catalogue produits (Excel / CSV)</div>
+        <div id="prod-upload-zone" class="upload-zone" onclick="document.getElementById('prod-file-input').click()"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="handleProduitsDrop(event)">
+          <div class="uz-icon">📦</div>
+          <p><b>Glisser-déposer un fichier ici</b></p>
+          <p>ou cliquer pour sélectionner</p>
+          <small>Formats .xlsx, .xls ou .csv — 1<sup>re</sup> ligne = en-têtes de colonnes</small>
+        </div>
+        <input type="file" id="prod-file-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleProduitsFileSelect(event)">
+      </div>
+
+      <div class="card" id="prod-mapping-card" style="display:none">
+        <div class="card-title">🔀 Correspondance des colonnes</div>
+        <p class="muted" style="font-size:12px;margin-bottom:12px" id="prod-file-info"></p>
+        <div class="form-group">
+          <label>Famille *</label>
+          <select id="pm-famille" onchange="analyzeProduitsImport()"></select>
+        </div>
+        <div class="form-group">
+          <label>Matière</label>
+          <select id="pm-matiere" onchange="analyzeProduitsImport()"></select>
+        </div>
+        <div class="form-group">
+          <label>Dimension caractéristique *</label>
+          <select id="pm-section" onchange="analyzeProduitsImport()"></select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>KG/M (ou KG/M²)</label>
+            <select id="pm-kgm" onchange="analyzeProduitsImport()"></select>
+          </div>
+          <div class="form-group">
+            <label>Unité nomenclature</label>
+            <select id="pm-unite" onchange="analyzeProduitsImport()"></select>
+          </div>
+        </div>
+        <p class="form-hint">* champs obligatoires — les lignes sans famille ni dimension seront ignorées. La correspondance des colonnes est devinée automatiquement, corrigez-la si besoin.</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" id="prod-status-card">
+        <div class="card-title">ℹ️ Statut</div>
+        <div id="prod-status-msg" class="muted">En attente d'un fichier Excel ou CSV...</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="prod-review" style="display:none">
+    <div class="flex-between flex-wrap" style="margin-bottom:12px">
+      <div>
+        <h3 style="font-size:15px;font-weight:700">Revue avant import</h3>
+        <p class="muted" style="font-size:12px;margin-top:2px" id="prod-review-summary"></p>
+      </div>
+      <div class="flex gap-4" style="flex-wrap:wrap;align-items:center">
+        <div class="flex gap-4" style="font-size:12px;align-items:center">
+          <span><span class="dot dot-green"></span> Nouveau</span>
+          <span><span class="dot dot-yellow"></span> Existant (maj)</span>
+          <span><span class="dot dot-red"></span> Ignoré</span>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="toggleAllProduitsRows(true)">Tout cocher</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleAllProduitsRows(false)">Tout décocher</button>
+        <button class="btn btn-ghost" onclick="cancelImportProduits()" style="color:var(--danger);border-color:var(--danger)">✕ Annuler</button>
+        <button class="btn btn-success" onclick="confirmImportProduits()" id="btn-confirm-import-produits">✔ Importer</button>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="max-height:55vh">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Statut</th>
+            <th>Famille</th>
+            <th>Matière</th>
+            <th>Dimension caractéristique</th>
+            <th>KG/M</th>
+            <th>Unité</th>
+            <th>Correspondance</th>
+          </tr>
+        </thead>
+        <tbody id="prod-review-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============================= PANEL: CORRESPONDANCES ============================= -->
+<div id="panel-correspondances" class="panel">
+  <div class="flex-between" style="margin-bottom:14px">
+    <div>
+      <h3 style="font-size:15px;font-weight:700">Table de correspondances</h3>
+      <p class="muted" style="font-size:12px;margin-top:3px">
+        Liez les désignations fournisseurs à vos articles internes. Ces correspondances sont utilisées automatiquement lors des imports.
+      </p>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="openAddCorrespondance()">+ Ajouter</button>
+  </div>
+
+  <div class="filter-bar">
+    <input id="cf-search" type="text" placeholder="🔍 Rechercher..." oninput="renderCorrespondances()" style="width:280px">
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Désignation Fournisseur</th>
+          <th>Fournisseur</th>
+          <th>Article Interne</th>
+          <th>Famille</th>
+          <th>Matière</th>
+          <th>Dimension caractéristique</th>
+          <th>Notes</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="corr-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============================= PANEL: HISTORIQUE ============================= -->
+<div id="panel-historique" class="panel">
+  <div class="flex-between flex-wrap" style="margin-bottom:14px">
+    <h3 style="font-size:15px;font-weight:700">Historique des achats fournisseurs</h3>
+    <button class="btn btn-ghost btn-sm" onclick="exportHistoriqueCSV()">⬇ Export CSV</button>
+  </div>
+
+  <div class="filter-bar">
+    <select id="h-fourn" onchange="renderHistorique()"><option value="">— Tous fournisseurs —</option></select>
+    <select id="h-famille" onchange="renderHistorique()"><option value="">— Toutes familles —</option></select>
+    <input id="h-from" type="date" onchange="renderHistorique()">
+    <input id="h-to" type="date" onchange="renderHistorique()">
+    <input id="h-search" type="text" placeholder="🔍 Rechercher..." oninput="renderHistorique()" style="width:200px">
+  </div>
+
+  <div class="table-wrap">
+    <table id="hist-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Fournisseur</th>
+          <th>N° Facture</th>
+          <th>Famille</th>
+          <th>Matière</th>
+          <th>Dimension caractéristique</th>
+          <th>Désignation facture</th>
+          <th class="text-right">Qté</th>
+          <th>Unité</th>
+          <th class="text-right">Prix unit. (€)</th>
+          <th class="text-right" style="white-space:nowrap"><button class="btn btn-xs" onclick="clearHistColFilters()" style="background:#e0e0e0;color:#555;font-size:10px;padding:2px 6px">✕</button> Montant (€)</th>
+        </tr>
+        <tr class="filter-row">
+          <th><input id="hcf-date" class="col-filter" type="text" placeholder="Filtrer date..." oninput="renderHistorique()"></th>
+          <th><select id="hcf-fourn" class="col-filter" onchange="renderHistorique()"><option value="">Tous</option></select></th>
+          <th><input id="hcf-facture" class="col-filter" type="text" placeholder="N° facture..." oninput="renderHistorique()"></th>
+          <th><select id="hcf-famille" class="col-filter" onchange="renderHistorique()"><option value="">Toutes</option></select></th>
+          <th><select id="hcf-matiere" class="col-filter" onchange="renderHistorique()"><option value="">Toutes</option></select></th>
+          <th><input id="hcf-section" class="col-filter" type="text" placeholder="Dimension..." oninput="renderHistorique()"></th>
+          <th><input id="hcf-desig" class="col-filter" type="text" placeholder="Désignation..." oninput="renderHistorique()"></th>
+          <th></th>
+          <th><select id="hcf-unite" class="col-filter" onchange="renderHistorique()">
+            <option value="">Toutes</option>
+            <option value="ML">ML</option><option value="KG">KG</option>
+            <option value="BA">BA</option><option value="FE">FE</option>
+            <option value="M2">M2</option><option value="U">U</option>
+          </select></th>
+          <th><div class="col-filter-range">
+            <input id="hcf-px-min" class="col-filter" type="number" placeholder="≥" min="0" step="0.01" oninput="renderHistorique()">
+            <input id="hcf-px-max" class="col-filter" type="number" placeholder="≤" min="0" step="0.01" oninput="renderHistorique()">
+          </div></th>
+          <th><div class="col-filter-range">
+            <input id="hcf-mt-min" class="col-filter" type="number" placeholder="≥" min="0" step="0.01" oninput="renderHistorique()">
+            <input id="hcf-mt-max" class="col-filter" type="number" placeholder="≤" min="0" step="0.01" oninput="renderHistorique()">
+          </div></th>
+        </tr>
+      </thead>
+      <tbody id="hist-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============================= PANEL: SETTINGS ============================= -->
+<div id="panel-settings" class="panel">
+  <div class="split-2" style="align-items:start">
+    <div>
+      <div class="card admin-only">
+        <div class="card-title">🔑 Extraction Claude (Anthropic)</div>
+        <div class="form-group">
+          <label>Clé API</label>
+          <p id="claude-status-text" class="muted">Vérification...</p>
+          <p class="form-hint">La clé n'est plus stockée dans l'application ni transmise au navigateur — elle est configurée exclusivement côté serveur via la variable d'environnement <code>ANTHROPIC_API_KEY</code> (voir <code>docker-compose.yml</code> / <code>.env</code>).</p>
+        </div>
+        <div class="form-group">
+          <label>Modèle Claude</label>
+          <select id="claude-model">
+            <option value="claude-opus-5">claude-opus-5 (recommandé)</option>
+            <option value="claude-sonnet-5">claude-sonnet-5 (plus rapide)</option>
+            <option value="claude-haiku-4-5-20251001">claude-haiku-4-5 (économique)</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="saveClaudeModel()">💾 Enregistrer</button>
+      </div>
+
+    </div>
+
+    <div>
+      <div class="card admin-only" id="card-users">
+        <div class="card-title">👥 Gestion des utilisateurs <span class="badge badge-blue" style="font-size:11px">Admin</span></div>
+        <div id="users-list" style="margin-bottom:14px"></div>
+        <hr class="sep">
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px">Ajouter / modifier un utilisateur</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Identifiant</label>
+            <input type="text" id="nu-username" placeholder="prénom.nom">
+          </div>
+          <div class="form-group">
+            <label>Mot de passe</label>
+            <input type="password" id="nu-password" placeholder="Laisser vide pour ne pas changer">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Rôle</label>
+            <select id="nu-role">
+              <option value="user">Utilisateur</option>
+              <option value="admin">Administrateur</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="saveUser()">💾 Enregistrer</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔒 Changer mon mot de passe</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ancien mot de passe</label>
+            <input type="password" id="cp-old" placeholder="••••••••">
+          </div>
+          <div class="form-group">
+            <label>Nouveau mot de passe</label>
+            <input type="password" id="cp-new" placeholder="••••••••">
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="changePassword()">🔒 Changer le mot de passe</button>
+      </div>
+
+      <div class="card admin-only">
+        <div class="card-title">💾 Sauvegarde et restauration</div>
+        <p class="muted" style="font-size:12px;margin-bottom:14px">Exportez toutes vos données (articles, correspondances, historique) en JSON pour les sauvegarder ou les transférer.</p>
+        <div class="flex" style="flex-wrap:wrap;gap:8px">
+          <button class="btn btn-ghost" onclick="exportJSON()">⬇ Exporter JSON</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('import-json-file').click()">⬆ Restaurer JSON</button>
+          <input type="file" id="import-json-file" accept=".json" style="display:none" onchange="importJSON(event)">
+        </div>
+        <hr class="sep">
+        <p class="muted" style="font-size:12px;margin-bottom:10px">⚠️ Réinitialiser les infos produits efface les prix, fournisseurs, dates et historique — les articles (famille/matière/dimension) sont conservés.</p>
+        <button class="btn btn-danger btn-sm" onclick="resetInfosProduits()">🔄 Réinitialiser les infos produits</button>
+        <hr class="sep">
+        <p class="muted" style="font-size:12px;margin-bottom:10px">⚠️ Tout supprimer efface définitivement les articles, correspondances, factures et historique. Le catalogue repart à 0 produit.</p>
+        <button class="btn btn-danger btn-sm" onclick="deleteAllData()">🗑 Tout supprimer</button>
+      </div>
+      <div class="card">
+        <div class="card-title">ℹ️ Informations</div>
+        <table style="font-size:12px;width:100%">
+          <tr><td class="muted" style="padding:3px 0">Articles</td><td id="info-articles" class="bold"></td></tr>
+          <tr><td class="muted" style="padding:3px 0">Correspondances</td><td id="info-corr" class="bold"></td></tr>
+          <tr><td class="muted" style="padding:3px 0">Factures importées</td><td id="info-factures" class="bold"></td></tr>
+          <tr><td class="muted" style="padding:3px 0">Lignes d'historique</td><td id="info-lignes" class="bold"></td></tr>
+          <tr><td class="muted" style="padding:3px 0">Dernière sauvegarde</td><td id="info-save" class="bold"></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end content -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+'use strict';
+
+// ============================================================
+// INITIAL DATA — le catalogue démarre vide, les articles sont
+// ajoutés manuellement ou via l'import de factures fournisseurs.
+// ============================================================
+const INITIAL_ARTICLES = [];
+
+// ============================================================
+// ============================================================
+// AUTH — session utilisateur
+// ============================================================
+const SESSION_KEY = 'tig_session';
+let currentUser = null; // {token, username, role}
+let claudeConfigured = null; // true/false une fois connu — jamais la clé elle-même, voir /api/claude-status
+
+function authHeader() {
+  return currentUser ? { 'Authorization': 'Bearer ' + currentUser.token } : {};
+}
+
+function saveSession(user) {
+  currentUser = user;
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+}
+
+function clearSession() {
+  currentUser = null;
+  sessionStorage.removeItem(SESSION_KEY);
+}
+
+function loadSession() {
+  try {
+    const s = sessionStorage.getItem(SESSION_KEY);
+    if (s) currentUser = JSON.parse(s);
+  } catch(e) {}
+}
+
+async function doLogin() {
+  const username = document.getElementById('login-user').value.trim();
+  const password = document.getElementById('login-pwd').value;
+  const errEl    = document.getElementById('login-err');
+  const btn      = document.getElementById('login-btn');
+  errEl.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'Connexion...';
+  try {
+    const res  = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.error || 'Erreur'; return; }
+    saveSession(data);
+    applySession();
+    await init();
+  } catch(e) {
+    errEl.textContent = 'Serveur inaccessible';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Se connecter';
+  }
+}
+
+async function doLogout() {
+  try { await fetch('/api/logout', { method: 'POST', headers: authHeader() }); } catch(e) {}
+  clearSession();
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('login-pwd').value = '';
+  document.getElementById('login-err').textContent = '';
+}
+
+function applySession() {
+  if (!currentUser) return;
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('header-user').textContent = '👤 ' + currentUser.username;
+  // Sections réservées admin
+  const isAdmin = currentUser.role === 'admin';
+  document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? '' : 'none');
+}
+
+// ============================================================
+// DATABASE — serveur partagé (/api/db)
+// ============================================================
+
+let db = freshDB();
+
+function freshDB() {
+  return {
+    settings: { model: 'claude-opus-5', supplier: 'BELMET' },
+    articles: JSON.parse(JSON.stringify(INITIAL_ARTICLES)),
+    correspondances: [],
+    factures: [],
+    lignes: [],
+    savedAt: null
+  };
+}
+
+async function loadDB() {
+  try {
+    const res = await fetch('/api/db', { headers: authHeader() });
+    if (res.status === 401) { doLogout(); return; }
+    if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.articles)) {
+        db = data;
+      }
+    }
+  } catch(e) {
+    console.warn('Impossible de charger la base depuis le serveur :', e);
+    toast('Serveur introuvable', 'err');
+  }
+  // Migration modèle : prix_fourn_max → prix_fourn, suppression prix_nomen/moy/nb_achats
+  db.articles.forEach(a => {
+    if (a.prix_fourn === undefined) a.prix_fourn = a.prix_fourn_max ?? null;
+    delete a.prix_nomen; delete a.prix_fourn_max; delete a.prix_fourn_moy; delete a.nb_achats;
+  });
+  // Migration sécurité : la clé API Claude ne doit plus jamais vivre côté client —
+  // purge toute trace résiduelle d'une ancienne version (db.json, localStorage).
+  if (db.settings && 'apiKey' in db.settings) delete db.settings.apiKey;
+  try {
+    localStorage.removeItem('gestTarifs_v2');
+    localStorage.removeItem('tig_v2');
+  } catch(e) {}
+}
+
+function saveDB() {
+  db.savedAt = new Date().toISOString();
+  fetch('/api/db', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    body: JSON.stringify(db)
+  }).then(r => { if (r.status === 401) doLogout(); })
+    .catch(e => {
+      console.error('Erreur sauvegarde serveur :', e);
+      toast('Erreur de sauvegarde — vérifiez la connexion au serveur', 'err');
+    });
+}
+
+// ============================================================
+// PANEL NAVIGATION
+// ============================================================
+function showPanel(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'tarifs') renderTarifs();
+  if (name === 'correspondances') renderCorrespondances();
+  if (name === 'historique') renderHistorique();
+  if (name === 'settings') renderSettings();
+}
+
+// ============================================================
+// UTILITIES
+// ============================================================
+function fmt(n, d = 2) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return Number(n).toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  try { return new Date(iso).toLocaleDateString('fr-FR'); } catch(e) { return iso; }
+}
+
+function daysAgo(iso) {
+  if (!iso) return null;
+  return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+}
+
+function toast(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = `toast toast-${type === 'ok' ? 'ok' : type === 'err' ? 'err' : 'info'}`;
+  el.textContent = msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+function openModal(html) {
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-bg').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-bg').classList.remove('open');
+}
+
+function esc(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function uniq(arr) { return [...new Set(arr)]; }
+
+function genId() { return Date.now() + '-' + Math.random().toString(36).slice(2, 7); }
+
+// ============================================================
+// TARIFS TABLE
+// ============================================================
+let tarifsSort = { key: 'famille', asc: true };
+
+function sortTarifs(key) {
+  if (tarifsSort.key === key) tarifsSort.asc = !tarifsSort.asc;
+  else { tarifsSort.key = key; tarifsSort.asc = true; }
+  renderTarifs();
+}
+
+function getFilteredArticles() {
+  // Top bar filters
+  const fFamille = document.getElementById('f-famille')?.value || '';
+  const fMatiere = document.getElementById('f-matiere')?.value || '';
+  const fSearch = (document.getElementById('f-search')?.value || '').toLowerCase().trim();
+  const fStatus = document.getElementById('f-status')?.value || '';
+  // Column filters
+  const cfFamille    = document.getElementById('cf-famille')?.value || '';
+  const cfMatiere    = document.getElementById('cf-matiere')?.value || '';
+  const cfSection    = (document.getElementById('cf-section')?.value || '').toLowerCase().trim();
+  const cfUniteNomen = document.getElementById('cf-unite-nomen')?.value || '';
+  const cfPrixMin    = parseFloat(document.getElementById('cf-prix-min')?.value);
+  const cfPrixMax    = parseFloat(document.getElementById('cf-prix-max')?.value);
+  const cfUniteFourn = document.getElementById('cf-unite-fourn')?.value || '';
+  const cfCoef       = document.getElementById('cf-coef')?.value || '';
+  const cfPfMin      = parseFloat(document.getElementById('cf-pf-min')?.value);
+  const cfPfMax      = parseFloat(document.getElementById('cf-pf-max')?.value);
+  const cfFourn      = document.getElementById('cf-fourn')?.value || '';
+  const cfMaj        = document.getElementById('cf-maj')?.value || '';
+  const cfStatut     = document.getElementById('cf-statut')?.value || '';
+
+  return db.articles.filter(a => {
+    // Top bar
+    if (fFamille && a.famille !== fFamille) return false;
+    if (fMatiere && a.matiere !== fMatiere) return false;
+    if (fSearch && !a.section.toLowerCase().includes(fSearch) && !a.famille.toLowerCase().includes(fSearch)) return false;
+    if (fStatus === 'updated' && !a.derniere_date) return false;
+    if (fStatus === 'missing_coef' && (a.coef_conv !== null || !a.derniere_date)) return false;
+    if (fStatus === 'no_invoice' && a.derniere_date) return false;
+    // Column filters
+    if (cfFamille && a.famille !== cfFamille) return false;
+    if (cfMatiere && a.matiere !== cfMatiere) return false;
+    if (cfSection && !a.section.toLowerCase().includes(cfSection)) return false;
+    if (cfUniteNomen && a.unite_nomen !== cfUniteNomen) return false;
+    const prixCalc = (a.prix_fourn !== null && a.coef_conv !== null) ? a.prix_fourn * a.coef_conv : null;
+    if (!isNaN(cfPrixMin) && (prixCalc === null || prixCalc < cfPrixMin)) return false;
+    if (!isNaN(cfPrixMax) && (prixCalc === null || prixCalc > cfPrixMax)) return false;
+    if (cfUniteFourn && a.unite_fourn !== cfUniteFourn) return false;
+    if (cfCoef === 'no' && a.coef_conv !== null) return false;
+    if (cfCoef === 'needs' && !(a.prix_fourn !== null && a.coef_conv === null)) return false;
+    if (!isNaN(cfPfMin) && (a.prix_fourn === null || a.prix_fourn < cfPfMin)) return false;
+    if (!isNaN(cfPfMax) && (a.prix_fourn === null || a.prix_fourn > cfPfMax)) return false;
+    if (cfFourn && a.dernier_fourn !== cfFourn) return false;
+    const days = daysAgo(a.derniere_date);
+    if (cfMaj === 'recent' && (days === null || days >= 90)) return false;
+    if (cfMaj === 'year'   && (days === null || days >= 365)) return false;
+    if (cfMaj === 'old'    && (days === null || days < 365)) return false;
+    if (cfMaj === 'never'  && days !== null) return false;
+    if (cfStatut === 'recent' && (days === null || days >= 90)) return false;
+    if (cfStatut === 'warn'   && (days === null || days < 90 || days >= 365)) return false;
+    if (cfStatut === 'old'    && (days === null || days < 365)) return false;
+    if (cfStatut === 'never'  && days !== null) return false;
+    return true;
+  }).sort((a, b) => {
+    let va = a[tarifsSort.key] ?? '';
+    let vb = b[tarifsSort.key] ?? '';
+    if (typeof va === 'string') va = va.toLowerCase();
+    if (typeof vb === 'string') vb = vb.toLowerCase();
+    return tarifsSort.asc ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1);
+  });
+}
+
+function clearColFilters() {
+  ['cf-famille','cf-matiere','cf-unite-nomen','cf-unite-fourn','cf-coef','cf-fourn','cf-maj','cf-statut'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['cf-section','cf-prix-min','cf-prix-max','cf-pf-min','cf-pf-max'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  updateColFilterHighlights();
+  renderTarifs();
+}
+
+function updateColFilterHighlights() {
+  // Highlight header cells that have an active column filter
+  const colMap = {
+    0: 'cf-famille', 1: 'cf-matiere', 2: 'cf-section',
+    3: 'cf-unite-nomen', 4: ['cf-prix-min','cf-prix-max'],
+    5: 'cf-unite-fourn', 6: 'cf-coef', 7: ['cf-pf-min','cf-pf-max'],
+    8: 'cf-fourn', 9: 'cf-maj', 10: 'cf-statut'
+  };
+  const headerCells = document.querySelectorAll('#tarifs-table thead tr:first-child th');
+  headerCells.forEach((th, i) => {
+    const ids = Array.isArray(colMap[i]) ? colMap[i] : [colMap[i]];
+    const active = ids.some(id => {
+      if (!id) return false;
+      const el = document.getElementById(id);
+      return el && el.value !== '';
+    });
+    th.classList.toggle('has-filter', active);
+  });
+}
+
+function populateFilterDropdowns() {
+  const familles = uniq(db.articles.map(a => a.famille)).sort();
+  const matieres = uniq(db.articles.map(a => a.matiere)).sort();
+  const fournisseurs = uniq(db.lignes.map(l => l.fournisseur).filter(Boolean)).sort();
+  const derniersFourn = uniq(db.articles.map(a => a.dernier_fourn).filter(Boolean)).sort();
+
+  // Top bar + column dropdowns for famille
+  ['f-famille', 'h-famille'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cur = el.value;
+    el.innerHTML = `<option value="">— Toutes familles —</option>` +
+      familles.map(f => `<option value="${esc(f)}" ${f === cur ? 'selected' : ''}>${esc(f)}</option>`).join('');
+  });
+  const cfFam = document.getElementById('cf-famille');
+  if (cfFam) {
+    const cur = cfFam.value;
+    cfFam.innerHTML = `<option value="">Toutes</option>` +
+      familles.map(f => `<option value="${esc(f)}" ${f === cur ? 'selected' : ''}>${esc(f)}</option>`).join('');
+  }
+
+  // Top bar + column dropdowns for matière
+  ['f-matiere'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cur = el.value;
+    el.innerHTML = `<option value="">— Toutes matières —</option>` +
+      matieres.map(m => `<option value="${esc(m)}" ${m === cur ? 'selected' : ''}>${esc(m)}</option>`).join('');
+  });
+  const cfMat = document.getElementById('cf-matiere');
+  if (cfMat) {
+    const cur = cfMat.value;
+    cfMat.innerHTML = `<option value="">Toutes</option>` +
+      matieres.map(m => `<option value="${esc(m)}" ${m === cur ? 'selected' : ''}>${esc(m)}</option>`).join('');
+  }
+
+  // Column dropdown for dernier fournisseur
+  const cfFourn = document.getElementById('cf-fourn');
+  if (cfFourn) {
+    const cur = cfFourn.value;
+    cfFourn.innerHTML = `<option value="">Tous</option>` +
+      derniersFourn.map(f => `<option value="${esc(f)}" ${f === cur ? 'selected' : ''}>${esc(f)}</option>`).join('');
+  }
+
+  // Historique fournisseur dropdown (top bar + colonne)
+  ['h-fourn','hcf-fourn'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cur = el.value;
+    const prefix = i === 0 ? '— Tous fournisseurs —' : 'Tous';
+    el.innerHTML = `<option value="">${prefix}</option>` +
+      fournisseurs.map(f => `<option value="${esc(f)}" ${f === cur ? 'selected' : ''}>${esc(f)}</option>`).join('');
+  });
+
+  // Historique colonnes famille + matière
+  const hcfFam = document.getElementById('hcf-famille');
+  if (hcfFam) { const cur=hcfFam.value; hcfFam.innerHTML=`<option value="">Toutes</option>`+familles.map(f=>`<option value="${esc(f)}" ${f===cur?'selected':''}>${esc(f)}</option>`).join(''); }
+  const hcfMat = document.getElementById('hcf-matiere');
+  if (hcfMat) { const cur=hcfMat.value; const matsLignes=uniq(db.lignes.map(l=>l.matiere).filter(Boolean)).sort(); hcfMat.innerHTML=`<option value="">Toutes</option>`+matsLignes.map(m=>`<option value="${esc(m)}" ${m===cur?'selected':''}>${esc(m)}</option>`).join(''); }
+}
+
+function renderTarifs() {
+  populateFilterDropdowns();
+  const articles = getFilteredArticles();
+  updateColFilterHighlights();
+
+  // Stats
+  const total = db.articles.length;
+  const withPrice = db.articles.filter(a => a.prix_fourn !== null && a.coef_conv !== null).length;
+  const needsCoefCount = db.articles.filter(a => a.prix_fourn !== null && a.coef_conv === null).length;
+  const noInvoice = db.articles.filter(a => !a.derniere_date).length;
+
+  document.getElementById('tarifs-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-val">${total}</div><div class="stat-lbl">Articles</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--success)">${withPrice}</div><div class="stat-lbl">Prix calculés</div></div>
+    <div class="stat-card" style="cursor:pointer" onclick="document.getElementById('cf-coef').value='needs';renderTarifs()" title="Cliquer pour filtrer"><div class="stat-val" style="color:var(--warn)">${needsCoefCount}</div><div class="stat-lbl">⚠ Prix sans coef</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--text3)">${noInvoice}</div><div class="stat-lbl">Sans facture</div></div>
+  `;
+
+  let html = '';
+  let lastFamille = null;
+
+  articles.forEach(a => {
+    if (a.famille !== lastFamille) {
+      html += `<tr class="tr-section"><td colspan="12">${esc(a.famille)}</td></tr>`;
+      lastFamille = a.famille;
+    }
+
+    const days = daysAgo(a.derniere_date);
+    const statusDot = !a.derniere_date ? `<span class="dot dot-grey" title="Pas encore facturé"></span>`
+      : days < 90 ? `<span class="dot dot-green" title="Mis à jour il y a ${days}j"></span>`
+      : days < 365 ? `<span class="dot dot-yellow" title="Mis à jour il y a ${days}j"></span>`
+      : `<span class="dot dot-red" title="Mis à jour il y a ${days}j — ancien"></span>`;
+
+    const statusBadge = !a.derniere_date ? `<span class="badge badge-grey">Sans facture</span>`
+      : days < 90 ? `<span class="badge badge-green">Récent</span>`
+      : days < 365 ? `<span class="badge badge-yellow">À vérifier</span>`
+      : `<span class="badge badge-red">Ancien</span>`;
+
+    const prixCalc = (a.prix_fourn !== null && a.coef_conv !== null)
+      ? parseFloat((a.prix_fourn * a.coef_conv).toFixed(4)) : null;
+    const needsCoef = a.prix_fourn !== null && a.coef_conv === null;
+
+    const prixNomenClass = prixCalc !== null
+      ? (days !== null && days < 90 ? 'price-fresh' : 'price-old') : 'price-null';
+
+    const prixNomenDisplay = prixCalc !== null
+      ? `${fmt(prixCalc)} €/${a.unite_nomen}`
+      : needsCoef
+        ? `<span style="color:var(--warn);font-size:11px">⚠ Saisir coef</span>`
+        : '<span class="price-null">—</span>';
+
+    const coefDisplay = a.coef_conv !== null
+      ? `<span class="editable-val" onclick="editCoef(${a.id})">${fmt(a.coef_conv, 4)}</span>`
+      : `<span class="editable-val empty" onclick="editCoef(${a.id})">Saisir</span>`;
+
+    const uniteFournDisplay = a.unite_fourn
+      ? `<span class="badge badge-blue">${esc(a.unite_fourn)}</span>`
+      : `<span class="muted">—</span>`;
+
+    const factureBadge = a.derniere_facture
+      ? `<button class="btn btn-xs" style="background:#e3f2fd;color:#1565c0;margin-left:4px;font-size:10px" onclick="showPanel('historique',document.querySelector('.tab-btn[onclick*=historique]'));setTimeout(()=>{const el=document.getElementById('hcf-facture');if(el){el.value='${esc(a.derniere_facture)}';renderHistorique();}},100)" title="Filtrer historique — ${esc(a.derniere_facture)}">🔍 ${esc(a.derniere_facture)}</button>`
+      + (a.derniere_facture_pdf ? `<button class="btn btn-xs" style="background:#e8f5e9;color:#2e7d32;margin-left:2px;font-size:10px" onclick="openPDF('${esc(a.derniere_facture_pdf)}')" title="Ouvrir le PDF">📄 PDF</button>` : '')
+      : '';
+
+    html += `<tr${needsCoef ? ' style="background:#fffde7"' : ''}>
+      <td>${esc(a.famille)}</td>
+      <td><span class="badge badge-grey">${esc(a.matiere)}</span></td>
+      <td class="bold">${esc(a.section)}</td>
+      <td><span class="badge badge-blue">${esc(a.unite_nomen)}</span></td>
+      <td class="price-cell ${prixNomenClass}">${prixNomenDisplay}</td>
+      <td>${uniteFournDisplay}</td>
+      <td class="text-right">${coefDisplay}${needsCoef ? ' <span title="Prix fournisseur disponible — coef manquant" style="color:var(--warn)">⚠</span>' : ''}</td>
+      <td class="price-cell">${a.prix_fourn !== null ? fmt(a.prix_fourn, 3) + ' €' + factureBadge : '<span class="price-null">—</span>'}</td>
+      <td class="nowrap">${a.dernier_fourn ? `<span class="badge badge-green">${esc(a.dernier_fourn)}</span>` : '<span class="muted">—</span>'}</td>
+      <td class="nowrap muted" style="font-size:12px">${a.derniere_date ? fmtDate(a.derniere_date) : '—'}</td>
+      <td>${statusBadge}</td>
+      <td class="nowrap">
+        <button class="btn btn-ghost btn-xs" onclick="editArticle(${a.id})">✏️</button>
+        <button class="btn btn-xs" style="background:#ffebee;color:#c62828" onclick="deleteArticle(${a.id})">🗑</button>
+      </td>
+    </tr>`;
+  });
+
+  if (!html) html = `<tr><td colspan="12" class="empty-state"><div class="es-icon">🔍</div><p>Aucun article ne correspond aux filtres</p></td></tr>`;
+
+  document.getElementById('tarifs-body').innerHTML = html;
+
+  // API key warning — statut connu côté serveur uniquement (booléen, jamais la clé elle-même)
+  const warn = document.getElementById('no-api-warn');
+  if (warn) warn.style.display = claudeConfigured === false ? '' : 'none';
+}
+
+// ============================================================
+// ARTICLE CRUD
+// ============================================================
+function editCoef(id) {
+  const a = db.articles.find(x => x.id === id);
+  if (!a) return;
+  openModal(`
+    <div class="modal-title">Coefficient de conversion — ${esc(a.famille)} ${esc(a.section)}</div>
+    <div class="alert alert-info">
+      ℹ️ Le coef. convertit l'unité fournisseur en unité nomenclature.<br>
+      <b>Formule :</b> Prix nomen. (€/${esc(a.unite_nomen)}) = Prix fourn. × Coef<br><br>
+      <b>Exemples :</b> KG→M : entrer kg/m (ex: 1,4 pour cornière 30×30×3) |
+      KG→M² : kg/m² (ex: 16 pour tôle 2mm) | ML→M : 1 | BA→M : 0,167 (1 barre=6m) | FE→M² : 0,5 (1 feuille=2m²)
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Unité fournisseur</label>
+        <select id="m-unite-fourn">
+          ${['ML','KG','BA','FE','M2','U'].map(u => `<option value="${u}" ${a.unite_fourn===u?'selected':''}>${u}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Coefficient (unité fourn. / unité nomen.)</label>
+        <input type="number" id="m-coef" value="${a.coef_conv ?? ''}" step="0.0001" min="0" placeholder="ex: 1.4">
+        ${a.kg_m ? `<p class="form-hint">KG/M renseigné dans l'inventaire : ${a.kg_m} — pour KG→M entrer ${a.kg_m}</p>` : ''}
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <input type="text" id="m-notes" value="${esc(a.notes)}" placeholder="Remarques...">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveCoef(${id})">💾 Enregistrer</button>
+    </div>
+  `);
+}
+
+function saveCoef(id) {
+  const a = db.articles.find(x => x.id === id);
+  if (!a) return;
+  const coef = parseFloat(document.getElementById('m-coef').value);
+  const unite = document.getElementById('m-unite-fourn').value;
+  const notes = document.getElementById('m-notes').value;
+
+  a.unite_fourn = unite;
+  a.coef_conv = isNaN(coef) ? null : coef;
+  a.notes = notes;
+
+  // prix_nomen est calculé à l'affichage (prix_fourn × coef_conv)
+
+  saveDB();
+  closeModal();
+  renderTarifs();
+  toast('Coefficient enregistré', 'ok');
+}
+
+function editArticle(id) {
+  const a = db.articles.find(x => x.id === id);
+  if (!a) return;
+  const familles = uniq(db.articles.map(x => x.famille)).sort();
+  openModal(`
+    <div class="modal-title">Modifier l'article — ${esc(a.famille)} ${esc(a.section)}</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Famille</label>
+        <input type="text" id="m-famille" value="${esc(a.famille)}" list="familles-list">
+        <datalist id="familles-list">${familles.map(f=>`<option value="${esc(f)}">`).join('')}</datalist>
+      </div>
+      <div class="form-group">
+        <label>Matière</label>
+        <input type="text" id="m-matiere" value="${esc(a.matiere)}">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Dimension caractéristique / Désignation</label>
+        <input type="text" id="m-section" value="${esc(a.section)}">
+      </div>
+      <div class="form-group">
+        <label>KG/M (ou KG/M²)</label>
+        <input type="number" id="m-kgm" value="${a.kg_m ?? ''}" step="0.01" min="0">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Unité nomenclature</label>
+        <select id="m-unite">
+          ${['M','M2','U','KG'].map(u=>`<option value="${u}" ${a.unite_nomen===u?'selected':''}>${u}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Prix calculé (lecture seule)</label>
+        <input type="text" disabled value="${a.prix_fourn !== null && a.coef_conv !== null ? fmt(a.prix_fourn * a.coef_conv) + ' €/' + a.unite_nomen : '— (coef non saisi)'}" style="background:#f5f5f5;color:#888">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveArticle(${id})">💾 Enregistrer</button>
+    </div>
+  `);
+}
+
+function saveArticle(id) {
+  const a = db.articles.find(x => x.id === id);
+  if (!a) return;
+  a.famille = document.getElementById('m-famille').value.trim();
+  a.matiere = document.getElementById('m-matiere').value.trim();
+  a.section = document.getElementById('m-section').value.trim();
+  const kgm = parseFloat(document.getElementById('m-kgm').value);
+  a.kg_m = isNaN(kgm) ? null : kgm;
+  a.unite_nomen = document.getElementById('m-unite').value;
+  saveDB();
+  closeModal();
+  renderTarifs();
+  toast('Article modifié', 'ok');
+}
+
+function openAddArticle() {
+  const familles = uniq(db.articles.map(x => x.famille)).sort();
+  openModal(`
+    <div class="modal-title">Ajouter un article</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Famille</label>
+        <input type="text" id="m-famille" list="familles-list" placeholder="TUBE CARRE">
+        <datalist id="familles-list">${familles.map(f=>`<option value="${esc(f)}">`).join('')}</datalist>
+      </div>
+      <div class="form-group">
+        <label>Matière</label>
+        <input type="text" id="m-matiere" placeholder="INOX 304">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Dimension caractéristique</label>
+        <input type="text" id="m-section" placeholder="50X50X2">
+      </div>
+      <div class="form-group">
+        <label>KG/M</label>
+        <input type="number" id="m-kgm" step="0.01" min="0">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Unité nomenclature</label>
+        <select id="m-unite">
+          <option value="M">M</option><option value="M2">M2</option>
+          <option value="U">U</option><option value="KG">KG</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="addNewArticle()">➕ Ajouter</button>
+    </div>
+  `);
+}
+
+function addNewArticle() {
+  const famille = document.getElementById('m-famille').value.trim();
+  const matiere = document.getElementById('m-matiere').value.trim();
+  const section = document.getElementById('m-section').value.trim();
+  if (!famille || !section) { toast('Famille et section obligatoires', 'err'); return; }
+  const kgm = parseFloat(document.getElementById('m-kgm').value);
+  const unite = document.getElementById('m-unite').value;
+  const maxId = db.articles.reduce((m, a) => Math.max(m, a.id), 0);
+  db.articles.push({
+    id: maxId + 1, famille, matiere: matiere || 'INOX 304', section,
+    kg_m: isNaN(kgm) ? null : kgm,
+    unite_nomen: unite, unite_fourn: null, coef_conv: null, prix_fourn: null,
+    dernier_fourn: null, derniere_facture: null, derniere_date: null, notes: ''
+  });
+  saveDB();
+  closeModal();
+  renderTarifs();
+  toast('Article ajouté', 'ok');
+}
+
+function deleteArticle(id) {
+  if (!confirm('Supprimer cet article ?')) return;
+  db.articles = db.articles.filter(a => a.id !== id);
+  saveDB();
+  renderTarifs();
+  toast('Article supprimé', 'ok');
+}
+
+// ============================================================
+// INVOICE IMPORT
+// ============================================================
+let importData = null; // { extracted, matches }
+let _correspReturnState = null; // temp state when opening article creation from correspondance modal
+
+function handleDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type === 'application/pdf') processFile(file);
+  else toast('Format PDF uniquement', 'err');
+}
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) processFile(file);
+  e.target.value = '';
+}
+
+async function processFile(file) {
+  if (claudeConfigured === false) {
+    toast('Clé API Claude non configurée sur le serveur — contactez un administrateur', 'err');
+    return;
+  }
+
+  setImportStatus('loading', `Lecture du fichier : ${file.name}`);
+  document.getElementById('import-review').style.display = 'none';
+  document.getElementById('import-info').style.display = 'none';
+
+  try {
+    // Read as base64
+    const base64 = await fileToBase64(file);
+
+    setImportStatus('loading', 'Envoi à Claude AI pour extraction...');
+    document.getElementById('import-spinner').style.display = '';
+
+    const extracted = await callClaudeExtract(base64);
+
+    document.getElementById('import-spinner').style.display = 'none';
+
+    if (!extracted || !extracted.lignes || !extracted.lignes.length) {
+      setImportStatus('error', 'Aucune ligne trouvée dans la facture.');
+      return;
+    }
+
+    // Deduplicate lines with same designation+price
+    extracted.lignes = dedupLines(extracted.lignes);
+
+    // Show header info
+    document.getElementById('import-info').style.display = '';
+    document.getElementById('inf-fourn').textContent = extracted.fournisseur || '—';
+    document.getElementById('inf-num').textContent = extracted.numero_facture || '—';
+    document.getElementById('inf-date').value = extracted.date || '';
+    document.getElementById('inf-total').textContent = extracted.total_ht ? fmt(extracted.total_ht) + ' €' : '—';
+    document.getElementById('inf-lines').textContent = extracted.lignes.length + ' lignes';
+
+    // Match lines
+    const matches = extracted.lignes.map(l => ({
+      ligne: l,
+      match: matchLigne(l),
+      articleId: null // will be set by auto-match or manual
+    }));
+
+    // Auto-assign confident matches
+    matches.forEach(m => {
+      if (m.match.confidence >= 0.85) m.articleId = m.match.article?.id ?? null;
+    });
+
+    importData = { extracted, matches, file, base64 };
+
+    renderImportReview(matches);
+    setImportStatus('ok', `Extraction réussie — ${extracted.lignes.length} lignes, ${matches.filter(m => m.articleId).length} correspondances trouvées.`);
+
+  } catch(err) {
+    document.getElementById('import-spinner').style.display = 'none';
+    setImportStatus('error', 'Erreur : ' + err.message);
+    toast('Erreur extraction : ' + err.message, 'err');
+    console.error(err);
+  }
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function callClaudeExtract(base64) {
+  const prompt = `Tu es un expert en extraction de données de factures fournisseurs de matériaux métalliques (inox, acier, aluminium).
+
+Analyse cette facture et retourne UNIQUEMENT un objet JSON valide (aucun texte avant/après) :
+
+{
+  "fournisseur": "nom du fournisseur",
+  "numero_facture": "numéro",
+  "date": "YYYY-MM-DD",
+  "total_ht": 0.00,
+  "lignes": [
+    {
+      "code_article": "code ou null",
+      "designation": "désignation complète et normalisée",
+      "quantite": 0.0,
+      "unite": "ML|KG|BA|FE|M2|U",
+      "prix_unitaire": 0.000,
+      "montant_ligne": 0.00
+    }
+  ]
+}
+
+Règles impératives :
+1. Retourner SEULEMENT le JSON brut, sans markdown, sans explication
+2. Déduplication : si une ligne apparaît deux fois (artefact PDF avec texte doublé), n'inclure qu'une seule occurrence
+3. Unités standardisées : ML=mètre linéaire, KG=kilogramme, BA=barre, FE=feuille/sheet, M2=mètre carré, U=unité
+4. Ignorer lignes de total, sous-total, TVA, transport, commentaires
+5. Si plusieurs lignes ont la même désignation mais des prix différents, les conserver séparément
+6. Le prix_unitaire est le prix net unitaire (après remises)
+7. Normaliser les désignations : ex "TUBE CARRE INOX 304 50X50X2", "TOLE INOX 1.4307 LAFF 1000X2000X2", "CORNIERE INOX 30X30X3"`;
+
+  // Passe par le proxy serveur : la clé API Claude ne quitte jamais le serveur,
+  // ni ne transite par ce navigateur (voir /api/extract-facture dans server.py).
+  const resp = await fetch('/api/extract-facture', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    body: JSON.stringify({
+      model: db.settings.model || 'claude-opus-5',
+      pdf_base64: base64,
+      prompt
+    })
+  });
+
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    // err.error est soit une chaîne (erreurs de notre serveur), soit un objet {message} (erreurs Anthropic relayées telles quelles)
+    throw new Error(err.error?.message || err.error || `HTTP ${resp.status}`);
+  }
+
+  const data = await resp.json();
+  const text = data.content?.[0]?.text || '';
+
+  // Extract JSON (handle markdown code blocks)
+  const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) || text.match(/(\{[\s\S]*\})/);
+  const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : text.trim();
+
+  return JSON.parse(jsonStr);
+}
+
+function dedupLines(lignes) {
+  const seen = new Set();
+  return lignes.filter(l => {
+    const key = `${l.designation}|${l.prix_unitaire}|${l.quantite}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+// ── MATCHING ────────────────────────────────────────────────
+function matchLigne(ligne) {
+  const desig = (ligne.designation || '').toUpperCase().trim();
+
+  // 1. Check correspondances table first
+  for (const c of db.correspondances) {
+    const cDesig = (c.designation_fourn || '').toUpperCase().trim();
+    if (cDesig && desig.includes(cDesig)) {
+      const article = db.articles.find(a => a.id === c.article_id);
+      if (article) return { article, confidence: 1.0, source: 'correspondance' };
+    }
+  }
+
+  // 2. Extract info from designation
+  const detectedFamille = detectFamille(desig);
+  const dims = extractDims(desig);
+  const detectedMatiere = detectMatiere(desig);
+
+  if (!detectedFamille || !dims) {
+    return { article: null, confidence: 0, source: 'none', famille: detectedFamille };
+  }
+
+  // 3. Find candidates by famille
+  const candidates = db.articles.filter(a => {
+    if (normFamille(a.famille) !== normFamille(detectedFamille)) return false;
+    return true;
+  });
+
+  if (!candidates.length) return { article: null, confidence: 0, source: 'none', famille: detectedFamille };
+
+  // 4. Score by dimension match
+  const scored = candidates.map(a => ({
+    a,
+    score: dimScore(normSection(a.section), dims, a.matiere, detectedMatiere)
+  })).sort((x, y) => y.score - x.score);
+
+  const best = scored[0];
+  if (best.score >= 0.9) return { article: best.a, confidence: best.score, source: 'auto' };
+  if (best.score >= 0.6) return { article: best.a, confidence: best.score, source: 'partial' };
+
+  return { article: null, confidence: 0, source: 'none', famille: detectedFamille };
+}
+
+function normFamille(f) {
+  const s = f.toUpperCase().replace(/\s+/g,' ').trim();
+  if (s.startsWith('TUBE CARR')) return 'TUBE CARRE';
+  if (s.startsWith('TUBE RECT') || s.startsWith('TUBE REC')) return 'TUBE RECT';
+  if (s.startsWith('TUBE ROND') || (s.startsWith('TUBE R') && !s.includes('ECTANG'))) return 'TUBE ROND';
+  if (s.startsWith('TUBE METRO') || s.startsWith('METRIQUE')) return 'TUBE METRO';
+  if (s.startsWith('TUBE ISO')) return 'TUBE ISO';
+  if (s.startsWith('CORNIERE') || s.startsWith('CORN')) return 'CORNIERE';
+  if (s.startsWith('PLAT') && !s.includes('MEPLAT')) return 'PLAT';
+  if (s.startsWith('MEPLAT') || s.startsWith('MÉPLAT')) return 'MEPLAT';
+  if (s.startsWith('ROND')) return 'ROND';
+  if (s.startsWith('TOLE PERFO') || s.startsWith('TÔLE PERFO')) return 'TOLE PERFO';
+  if (s.startsWith('TOLE RELIEF') || s.startsWith('TÔLE RELIEF')) return 'TOLE RELIEF';
+  if (s.startsWith('TOLE') || s.startsWith('TÔLE')) return 'TOLE';
+  if (s.startsWith('GRILLAGE')) return 'GRILLAGE';
+  if (s.startsWith('STEPBLOC')) return 'STEPBLOC';
+  if (s.startsWith('CARRE') || s === 'CARR') return 'CARRE';
+  return s;
+}
+
+function detectFamille(desig) {
+  const mappings = [
+    ['TUBE CARRE', /TUBE\s+CAR+[EÉ]/i],
+    ['TUBE RECT', /TUBE\s+RECT/i],
+    ['TUBE ROND', /TUBE\s+ROND/i],
+    ['TUBE METRO', /TUBE\s+METRO|METRIQUE/i],
+    ['TUBE ISO', /TUBE\s+ISO/i],
+    ['CORNIERE', /CORNIERE|CORNIÈ/i],
+    ['MEPLAT', /MEPLAT|MÉPLAT/i],
+    ['PLAT', /\bPLAT\b/i],
+    ['TOLE PERFO', /TOLE\s+PERFO|TÔLE\s+PERFO/i],
+    ['TOLE RELIEF', /TOLE\s+(A\s+)?RELIEF|TÔLE\s+(A\s+)?RELIEF/i],
+    ['TOLE', /\bTOLE\b|\bTÔLE\b/i],
+    ['ROND', /\bROND\b/i],
+    ['GRILLAGE', /GRILLAGE/i],
+    ['STEPBLOC', /STEPBLOC/i],
+    ['CARRE', /\bCARRE\b|\bCARRÉ\b/i],
+  ];
+  for (const [name, re] of mappings) {
+    if (re.test(desig)) return name;
+  }
+  return null;
+}
+
+function extractDims(desig) {
+  // Extract dimension patterns like 50X50X2, D16, 1000X2000, etc.
+  const matches = desig.match(/\d+[,.]?\d*\s*[Xx×]\s*\d+[,.]?\d*(?:\s*[Xx×]\s*\d+[,.]?\d*)?/g);
+  if (matches && matches.length) return matches.map(m => m.replace(/\s/g,'').toUpperCase());
+  // Also try D-prefix (round bars)
+  const dMatch = desig.match(/\bD\s*(\d+[,.]?\d*)\b/i);
+  if (dMatch) return ['D' + dMatch[1]];
+  // Single number dimension
+  const single = desig.match(/\b(\d+)\b/g);
+  if (single) return single;
+  return null;
+}
+
+function normSection(s) {
+  return s.toUpperCase().replace(/\s/g,'').replace(/,/g,'.');
+}
+
+function dimScore(section, dims, artMatiere, detectedMatiere) {
+  let score = 0;
+  const sNorm = section.replace(/EP|D/g,'').replace(/[^0-9X.]/g,'');
+  const dimsNorm = dims.map(d => d.replace(/EP|D/g,'').replace(/[^0-9X.]/g,''));
+
+  for (const d of dimsNorm) {
+    if (sNorm === d) { score = 1.0; break; }
+    if (sNorm.includes(d) || d.includes(sNorm)) score = Math.max(score, 0.8);
+    // Partial dimension match (first 2 numbers)
+    const sParts = sNorm.split('X');
+    const dParts = d.split('X');
+    if (sParts[0] === dParts[0] && sParts[1] === dParts[1]) score = Math.max(score, 0.75);
+    if (sParts[0] === dParts[0]) score = Math.max(score, 0.5);
+  }
+
+  // Matiere bonus
+  if (score > 0 && detectedMatiere) {
+    if (artMatiere.includes('316') && detectedMatiere.includes('316')) score = Math.min(1, score + 0.1);
+    else if (!artMatiere.includes('316') && !detectedMatiere.includes('316')) score = Math.min(1, score + 0.05);
+    else if (artMatiere.includes('316') !== detectedMatiere.includes('316')) score = Math.max(0, score - 0.2);
+  }
+
+  return score;
+}
+
+function detectMatiere(desig) {
+  if (/316L?|1\.4404|1\.4571/i.test(desig)) return 'INOX 316L';
+  if (/304L?|1\.4307|1\.4301/i.test(desig)) return 'INOX 304';
+  if (/INOX/i.test(desig)) return 'INOX 304';
+  return null;
+}
+
+// ── RENDER IMPORT REVIEW ─────────────────────────────────────
+function renderImportReview(matches) {
+  const unmatched = matches.filter(m => !m.articleId).length;
+  const alertEl = document.getElementById('import-unmatched-alert');
+  if (unmatched > 0) {
+    alertEl.style.display = '';
+    document.getElementById('import-unmatched-msg').textContent =
+      `${unmatched} ligne(s) sans correspondance. Assignez-les manuellement ou créez les correspondances.`;
+  } else {
+    alertEl.style.display = 'none';
+  }
+
+  const arts = db.articles;
+  const artOptions = arts.map(a =>
+    `<option value="${a.id}">${esc(a.famille)} — ${esc(a.section)} (${esc(a.matiere)})</option>`
+  ).join('');
+
+  let html = '';
+  matches.forEach((m, i) => {
+    const l = m.ligne;
+    const matched = m.articleId !== null;
+    const conf = m.match.confidence;
+    const rowClass = matched ? (conf >= 0.85 ? 'match-ok' : 'match-partial') : 'match-none';
+
+    const artName = m.articleId
+      ? (() => { const a = arts.find(x => x.id === m.articleId); return a ? `${a.famille} ${a.section} (${a.matiere})` : '?'; })()
+      : '—';
+
+    const confBadge = matched
+      ? (conf >= 0.85 ? `<span class="badge badge-green">${Math.round(conf*100)}%</span>` : `<span class="badge badge-yellow">${Math.round(conf*100)}%</span>`)
+      : `<span class="badge badge-red">Non trouvé</span>`;
+
+    html += `<tr class="${rowClass}">
+      <td>
+        <div class="bold" style="font-size:12px">${esc(l.designation)}</div>
+        ${l.code_article ? `<div class="muted" style="font-size:11px">Code: ${esc(l.code_article)}</div>` : ''}
+      </td>
+      <td class="text-right">${fmt(l.quantite, 3)}</td>
+      <td><span class="badge badge-blue">${esc(l.unite)}</span></td>
+      <td class="price-cell text-right">${fmt(l.prix_unitaire, 3)}</td>
+      <td class="price-cell text-right">${fmt(l.montant_ligne)}</td>
+      <td>
+        <div class="flex" style="gap:6px;align-items:center">
+          ${confBadge}
+          <select class="match-select" data-idx="${i}" onchange="updateMatch(${i},this.value)" style="font-size:12px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;flex:1">
+            <option value="">— Non assigné —</option>
+            ${artOptions.replace(
+              `value="${m.articleId}"`,
+              `value="${m.articleId}" selected`
+            )}
+          </select>
+        </div>
+      </td>
+      <td>
+        <button class="btn btn-ghost btn-xs" onclick="addCorrespondanceFromImport(${i})" title="Créer correspondance">🔗</button>
+      </td>
+    </tr>`;
+  });
+
+  document.getElementById('import-review-body').innerHTML = html;
+  document.getElementById('import-review').style.display = '';
+}
+
+function updateMatch(idx, artIdStr) {
+  if (!importData) return;
+  importData.matches[idx].articleId = artIdStr ? parseInt(artIdStr) : null;
+  // Update the unmatched count
+  const unmatched = importData.matches.filter(m => !m.articleId).length;
+  const alertEl = document.getElementById('import-unmatched-alert');
+  if (unmatched > 0) {
+    alertEl.style.display = '';
+    document.getElementById('import-unmatched-msg').textContent =
+      `${unmatched} ligne(s) sans correspondance.`;
+  } else {
+    alertEl.style.display = 'none';
+  }
+}
+
+function addCorrespondanceFromImport(idx) {
+  if (!importData) return;
+  const m = importData.matches[idx];
+  const l = m.ligne;
+  openAddCorrespondance(l.designation, importData.extracted.fournisseur, m.articleId);
+}
+
+function cancelImport() {
+  if (!confirm('Annuler l\'import en cours ? Les données extraites seront perdues.')) return;
+  importData = null;
+  document.getElementById('import-review').style.display = 'none';
+  document.getElementById('import-info').style.display = 'none';
+  setImportStatus('', 'En attente d\'un fichier PDF...');
+  document.getElementById('import-status-msg').className = 'muted';
+  document.getElementById('import-status-msg').style.color = '';
+}
+
+async function openPDF(filename) {
+  try {
+    const res = await fetch('/pdfs/' + encodeURIComponent(filename), { headers: authHeader() });
+    if (!res.ok) { toast('PDF introuvable sur le serveur', 'err'); return; }
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const win  = window.open(url, '_blank');
+    if (win) setTimeout(() => URL.revokeObjectURL(url), 10000);
+  } catch(e) {
+    toast('Impossible d\'ouvrir le PDF', 'err');
+  }
+}
+
+async function uploadPDF(base64Data, fournisseur, numFacture, date) {
+  // Nom de fichier : FOURNISSEUR_FACTURE_DATE.pdf
+  const safeName = [fournisseur, numFacture, date]
+    .map(s => (s || '').replace(/[^A-Za-z0-9_\-]/g, '_'))
+    .join('_');
+  try {
+    const res = await fetch('/api/pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeader() },
+      body: JSON.stringify({ filename: safeName + '.pdf', data: base64Data })
+    });
+    if (res.ok) {
+      const json = await res.json();
+      return json.filename;
+    }
+  } catch(e) {
+    console.warn('Upload PDF échoué :', e);
+  }
+  return null;
+}
+
+async function confirmImport() {
+  if (!importData) return;
+  const { extracted, matches, base64, file } = importData;
+
+  const date = document.getElementById('inf-date').value;
+  if (!date) {
+    toast('Renseignez la date de la facture avant de confirmer l\'import', 'err');
+    document.getElementById('inf-date').focus();
+    return;
+  }
+  const fournisseur = extracted.fournisseur || db.settings.supplier || 'INCONNU';
+  const numFacture = extracted.numero_facture || '—';
+
+  // Check if this invoice was already imported
+  if (db.factures.find(f => f.numero === numFacture && f.fournisseur === fournisseur)) {
+    if (!confirm(`La facture ${numFacture} (${fournisseur}) semble déjà importée. Continuer quand même ?`)) return;
+  }
+
+  let updated = 0;
+  let added = 0;
+
+  // Group matched lines by articleId to handle multiple prices
+  const byArticle = {};
+  matches.forEach(m => {
+    if (!m.articleId) return;
+    if (!byArticle[m.articleId]) byArticle[m.articleId] = [];
+    byArticle[m.articleId].push(m.ligne);
+  });
+
+  Object.entries(byArticle).forEach(([artIdStr, lignes]) => {
+    const artId = parseInt(artIdStr);
+    const a = db.articles.find(x => x.id === artId);
+    if (!a) return;
+
+    // Plusieurs lignes pour le même article : on prend le prix max calculé
+    const prices = lignes.map(l => l.prix_unitaire).filter(p => p > 0);
+    if (!prices.length) return;
+
+    const maxPrice = Math.max(...prices);
+    const unite = lignes[0].unite;
+
+    a.prix_fourn = maxPrice;
+    a.unite_fourn = unite;
+    a.dernier_fourn = fournisseur;
+    a.derniere_facture = numFacture;
+    a.derniere_date = date;
+    a.derniere_facture_pdf = null; // sera mis à jour après upload
+
+    updated++;
+
+    // Add to history
+    lignes.forEach(l => {
+      db.lignes.push({
+        id: genId(),
+        date, fournisseur, numero_facture: numFacture,
+        article_id: artId,
+        famille: a.famille, matiere: a.matiere, section: a.section,
+        designation_fourn: l.designation,
+        quantite: l.quantite, unite: l.unite,
+        prix_unitaire: l.prix_unitaire, montant: l.montant_ligne
+      });
+      added++;
+    });
+  });
+
+  // Unmatched lines — add to history as unmatched
+  matches.forEach(m => {
+    if (m.articleId) return;
+    const l = m.ligne;
+    db.lignes.push({
+      id: genId(),
+      date, fournisseur, numero_facture: numFacture,
+      article_id: null,
+      famille: m.match.famille || '?', matiere: '?', section: '?',
+      designation_fourn: l.designation,
+      quantite: l.quantite, unite: l.unite,
+      prix_unitaire: l.prix_unitaire, montant: l.montant_ligne
+    });
+  });
+
+  // Upload PDF au serveur
+  const pdfFilename = await uploadPDF(base64, fournisseur, numFacture, date);
+
+  // Mettre à jour le lien PDF dans les articles mis à jour
+  if (pdfFilename) {
+    Object.keys(byArticle).forEach(artIdStr => {
+      const a = db.articles.find(x => x.id === parseInt(artIdStr));
+      if (a) a.derniere_facture_pdf = pdfFilename;
+    });
+  }
+
+  // Record invoice
+  db.factures.push({
+    id: genId(),
+    numero: numFacture, fournisseur, date,
+    total_ht: extracted.total_ht,
+    nb_lignes: matches.length,
+    nb_matched: updated,
+    pdf_file: pdfFilename || null,
+    imported_at: new Date().toISOString()
+  });
+
+  saveDB();
+  importData = null;
+  document.getElementById('import-review').style.display = 'none';
+  document.getElementById('import-info').style.display = 'none';
+
+  setImportStatus('ok', `Import terminé — ${updated} articles mis à jour${pdfFilename ? ', PDF stocké' : ''}.`);
+  toast(`Import réussi : ${updated} articles mis à jour`, 'ok');
+  renderTarifs();
+}
+
+function setImportStatus(type, msg) {
+  const el = document.getElementById('import-status-msg');
+  el.className = '';
+  if (type === 'loading') el.className = 'muted';
+  else if (type === 'ok') el.style.color = 'var(--success)';
+  else if (type === 'error') el.style.color = 'var(--danger)';
+  el.textContent = msg;
+}
+
+// ============================================================
+// IMPORT PRODUITS — Excel / CSV, avec matching sur le catalogue existant
+// ============================================================
+let produitsImportData = null; // { headers, rows: raw file rows, mapping, reviewRows }
+
+const PROD_FIELD_ALIASES = {
+  famille:  ['famille', 'family', 'categorie', 'catégorie'],
+  matiere:  ['matiere', 'matière', 'materiau', 'matériau', 'material', 'nuance'],
+  section:  ['section', 'dimension', 'dimensioncaracteristique', 'dimensioncaractéristique', 'diametre', 'diamètre', 'reference', 'référence', 'designation', 'désignation'],
+  kgm:      ['kgm', 'kg/m', 'kg_m', 'poids', 'poidsm', 'kg/m2', 'kgm2'],
+  unite:    ['unite', 'unité', 'unitenomenclature', 'uniténomenclature', 'unitenomen', 'unité nomen.', 'unit']
+};
+
+function normHeader(h) {
+  return String(h || '')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '') // enlève les accents
+    .toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+function guessColumn(headers, field) {
+  const aliases = PROD_FIELD_ALIASES[field].map(normHeader);
+  const idx = headers.findIndex(h => aliases.includes(normHeader(h)));
+  return idx;
+}
+
+function handleProduitsDrop(e) {
+  e.preventDefault();
+  document.getElementById('prod-upload-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) processProduitsFile(file);
+}
+
+function handleProduitsFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) processProduitsFile(file);
+  e.target.value = '';
+}
+
+async function processProduitsFile(file) {
+  if (typeof XLSX === 'undefined') {
+    toast('Librairie de lecture Excel/CSV indisponible (pas de connexion internet ?)', 'err');
+    return;
+  }
+  setProdStatus('loading', `Lecture du fichier : ${file.name}`);
+  try {
+    const isCsv = /\.csv$/i.test(file.name);
+    // Les .csv sont lus comme texte (décodage UTF-8 natif du navigateur, gère aussi le BOM) —
+    // lire un CSV en ArrayBuffer fait mal interpréter les accents par SheetJS.
+    const wb = isCsv
+      ? XLSX.read(await file.text(), { type: 'string' })
+      : XLSX.read(await file.arrayBuffer(), { type: 'array' });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: true });
+    if (!rows.length) { setProdStatus('error', 'Fichier vide.'); return; }
+
+    const headers = rows[0].map(h => String(h ?? '').trim());
+    const dataRows = rows.slice(1).filter(r => r.some(c => String(c ?? '').trim() !== ''));
+    if (!dataRows.length) { setProdStatus('error', 'Aucune ligne de données trouvée.'); return; }
+
+    produitsImportData = { headers, dataRows, mapping: null, reviewRows: [] };
+
+    document.getElementById('prod-file-info').textContent =
+      `${file.name} — ${dataRows.length} ligne(s), ${headers.length} colonne(s)`;
+
+    // Pré-remplit les <select> de correspondance de colonnes
+    const fields = [
+      ['pm-famille', 'famille', true],
+      ['pm-matiere', 'matiere', false],
+      ['pm-section', 'section', true],
+      ['pm-kgm', 'kgm', false],
+      ['pm-unite', 'unite', false]
+    ];
+    fields.forEach(([selectId, field]) => {
+      const sel = document.getElementById(selectId);
+      const guessed = guessColumn(headers, field);
+      sel.innerHTML = '<option value="">— Ignorer —</option>' +
+        headers.map((h, i) => `<option value="${i}" ${i === guessed ? 'selected' : ''}>${esc(h || '(colonne ' + (i + 1) + ')')}</option>`).join('');
+    });
+
+    document.getElementById('prod-mapping-card').style.display = '';
+    setProdStatus('ok', 'Fichier lu — vérifiez la correspondance des colonnes ci-contre.');
+    analyzeProduitsImport();
+  } catch (err) {
+    setProdStatus('error', 'Erreur de lecture : ' + err.message);
+    toast('Erreur lecture fichier : ' + err.message, 'err');
+  }
+}
+
+function setProdStatus(type, msg) {
+  const el = document.getElementById('prod-status-msg');
+  el.className = '';
+  if (type === 'loading') el.className = 'muted';
+  else if (type === 'ok') el.style.color = 'var(--success)';
+  else if (type === 'error') el.style.color = 'var(--danger)';
+  el.textContent = msg;
+}
+
+function prodKey(famille, matiere, section) {
+  const n = s => String(s || '').toUpperCase().trim().replace(/\s+/g, ' ');
+  return n(famille) + '|' + n(matiere) + '|' + normSection(section || '');
+}
+
+// Analyse les lignes du fichier selon le mapping choisi et les compare au
+// catalogue existant (matching exact sur famille + matière + dimension normalisées).
+function analyzeProduitsImport() {
+  if (!produitsImportData) return;
+  const { headers, dataRows } = produitsImportData;
+
+  const colFamille = document.getElementById('pm-famille').value;
+  const colMatiere = document.getElementById('pm-matiere').value;
+  const colSection = document.getElementById('pm-section').value;
+  const colKgm     = document.getElementById('pm-kgm').value;
+  const colUnite    = document.getElementById('pm-unite').value;
+
+  if (colFamille === '' || colSection === '') {
+    document.getElementById('prod-review').style.display = 'none';
+    setProdStatus('error', 'Sélectionnez au moins les colonnes Famille et Dimension caractéristique.');
+    return;
+  }
+
+  const existingByKey = new Map();
+  db.articles.forEach(a => existingByKey.set(prodKey(a.famille, a.matiere, a.section), a));
+
+  const seenInFile = new Set(); // détecte les doublons à l'intérieur du fichier importé
+  const reviewRows = dataRows.map(r => {
+    const famille = String(r[colFamille] ?? '').trim();
+    const matiere = colMatiere !== '' ? String(r[colMatiere] ?? '').trim() : '';
+    const section = String(r[colSection] ?? '').trim();
+    const kgmRaw  = colKgm !== '' ? r[colKgm] : '';
+    const kgm     = kgmRaw !== '' && !isNaN(parseFloat(kgmRaw)) ? parseFloat(kgmRaw) : null;
+    let unite     = colUnite !== '' ? String(r[colUnite] ?? '').trim().toUpperCase() : '';
+    if (!['M', 'M2', 'U', 'KG'].includes(unite)) unite = '';
+
+    if (!famille || !section) {
+      return { famille, matiere, section, kg_m: kgm, unite_nomen: unite, status: 'invalid', include: false };
+    }
+
+    const key = prodKey(famille, matiere, section);
+    const dup = seenInFile.has(key);
+    seenInFile.add(key);
+    const existing = existingByKey.get(key);
+
+    if (dup) {
+      return { famille, matiere, section, kg_m: kgm, unite_nomen: unite, status: 'invalid', include: false, reason: 'doublon dans le fichier' };
+    }
+    if (existing) {
+      return { famille, matiere, section, kg_m: kgm, unite_nomen: unite, status: 'match', matchId: existing.id, include: true };
+    }
+    return { famille, matiere, section, kg_m: kgm, unite_nomen: unite, status: 'new', include: true };
+  });
+
+  produitsImportData.reviewRows = reviewRows;
+  renderProduitsReview();
+}
+
+function renderProduitsReview() {
+  const rows = produitsImportData?.reviewRows || [];
+  const nbNew = rows.filter(r => r.status === 'new').length;
+  const nbMatch = rows.filter(r => r.status === 'match').length;
+  const nbInvalid = rows.filter(r => r.status === 'invalid').length;
+
+  document.getElementById('prod-review-summary').textContent =
+    `${nbNew} nouveau(x), ${nbMatch} existant(s) à mettre à jour, ${nbInvalid} ignoré(s).`;
+
+  const tbody = document.getElementById('prod-review-body');
+  tbody.innerHTML = rows.map((r, i) => {
+    const dot = r.status === 'new' ? 'dot-green' : r.status === 'match' ? 'dot-yellow' : 'dot-red';
+    const label = r.status === 'new' ? 'Nouveau' : r.status === 'match' ? 'Existant (maj)' : `Ignoré${r.reason ? ' — ' + esc(r.reason) : ' — données manquantes'}`;
+    const match = r.status === 'match' ? db.articles.find(a => a.id === r.matchId) : null;
+    const corr = match
+      ? `KG/M actuel : ${match.kg_m ?? '—'} · Unité actuelle : ${match.unite_nomen}`
+      : (r.status === 'new' ? '—' : '');
+    return `
+      <tr style="${r.status === 'invalid' ? 'opacity:.5' : ''}">
+        <td><input type="checkbox" ${r.include ? 'checked' : ''} ${r.status === 'invalid' ? 'disabled' : ''} onchange="produitsImportData.reviewRows[${i}].include=this.checked"></td>
+        <td><span class="dot ${dot}"></span> ${label}</td>
+        <td>${esc(r.famille) || '—'}</td>
+        <td>${esc(r.matiere) || '—'}</td>
+        <td class="bold">${esc(r.section) || '—'}</td>
+        <td class="text-right">${r.kg_m ?? '—'}</td>
+        <td>${esc(r.unite_nomen) || '—'}</td>
+        <td class="muted" style="font-size:12px">${corr}</td>
+      </tr>`;
+  }).join('');
+
+  document.getElementById('prod-review').style.display = rows.length ? '' : 'none';
+}
+
+function toggleAllProduitsRows(state) {
+  if (!produitsImportData) return;
+  produitsImportData.reviewRows.forEach(r => { if (r.status !== 'invalid') r.include = state; });
+  renderProduitsReview();
+}
+
+function cancelImportProduits() {
+  if (!confirm('Annuler l\'import en cours ?')) return;
+  produitsImportData = null;
+  document.getElementById('prod-mapping-card').style.display = 'none';
+  document.getElementById('prod-review').style.display = 'none';
+  document.getElementById('prod-file-info').textContent = '';
+  setProdStatus('', 'En attente d\'un fichier Excel ou CSV...');
+  document.getElementById('prod-status-msg').className = 'muted';
+  document.getElementById('prod-status-msg').style.color = '';
+}
+
+function confirmImportProduits() {
+  if (!produitsImportData) return;
+  const rows = produitsImportData.reviewRows.filter(r => r.include && r.status !== 'invalid');
+  if (!rows.length) { toast('Aucune ligne sélectionnée', 'err'); return; }
+
+  let created = 0, updated = 0;
+  rows.forEach(r => {
+    if (r.status === 'new') {
+      const maxId = db.articles.reduce((m, a) => Math.max(m, a.id), 0);
+      db.articles.push({
+        id: maxId + 1,
+        famille: r.famille, matiere: r.matiere || 'INOX 304', section: r.section,
+        kg_m: r.kg_m, unite_nomen: r.unite_nomen || 'M',
+        unite_fourn: null, coef_conv: null, prix_fourn: null,
+        dernier_fourn: null, derniere_facture: null, derniere_date: null, notes: ''
+      });
+      created++;
+    } else if (r.status === 'match') {
+      const a = db.articles.find(x => x.id === r.matchId);
+      if (!a) return;
+      // Ne complète que les champs fournis par le fichier — ne blanchit jamais une valeur existante.
+      if (r.kg_m !== null) a.kg_m = r.kg_m;
+      if (r.unite_nomen) a.unite_nomen = r.unite_nomen;
+      updated++;
+    }
+  });
+
+  saveDB();
+  renderTarifs();
+  produitsImportData = null;
+  document.getElementById('prod-mapping-card').style.display = 'none';
+  document.getElementById('prod-review').style.display = 'none';
+  document.getElementById('prod-file-info').textContent = '';
+  setProdStatus('ok', `Import terminé — ${created} article(s) créé(s), ${updated} mis à jour.`);
+  toast(`Import produits réussi : ${created} créé(s), ${updated} mis à jour`, 'ok');
+}
+
+// ============================================================
+// CORRESPONDANCES
+// ============================================================
+function renderCorrespondances() {
+  const search = (document.getElementById('cf-search')?.value || '').toLowerCase();
+  const corrs = db.correspondances.filter(c =>
+    !search || c.designation_fourn.toLowerCase().includes(search)
+  );
+
+  let html = '';
+  if (!corrs.length) {
+    html = `<tr><td colspan="8" class="empty-state"><div class="es-icon">🔗</div><p>Aucune correspondance définie</p><p class="muted" style="font-size:13px;margin-top:8px">Elles se créent automatiquement lors des imports, ou manuellement.</p></td></tr>`;
+  } else {
+    corrs.forEach(c => {
+      const a = db.articles.find(x => x.id === c.article_id);
+      html += `<tr>
+        <td class="bold" style="max-width:280px;overflow:hidden;text-overflow:ellipsis">${esc(c.designation_fourn)}</td>
+        <td><span class="badge badge-blue">${esc(c.fournisseur || '—')}</span></td>
+        <td>${a ? `<span class="badge badge-green">${esc(a.famille)} ${esc(a.section)}</span>` : '<span class="badge badge-red">Article supprimé</span>'}</td>
+        <td class="muted">${a ? esc(a.famille) : '—'}</td>
+        <td class="muted">${a ? esc(a.matiere) : '—'}</td>
+        <td class="muted">${a ? esc(a.section) : '—'}</td>
+        <td class="muted" style="font-size:12px">${esc(c.notes || '')}</td>
+        <td class="nowrap">
+          <button class="btn btn-ghost btn-xs" onclick="editCorrespondance('${esc(c.id)}')">✏️</button>
+          <button class="btn btn-xs" style="background:#ffebee;color:#c62828" onclick="deleteCorrespondance('${esc(c.id)}')">🗑</button>
+        </td>
+      </tr>`;
+    });
+  }
+  document.getElementById('corr-body').innerHTML = html;
+}
+
+function openAddCorrespondance(prefixDesig = '', prefixFourn = '', prefixArtId = null) {
+  const arts = db.articles;
+  const artOptions = arts.map(a =>
+    `<option value="${a.id}" ${a.id === prefixArtId ? 'selected' : ''}>${esc(a.famille)} — ${esc(a.section)} (${esc(a.matiere)})</option>`
+  ).join('');
+
+  openModal(`
+    <div class="modal-title">Ajouter une correspondance</div>
+    <div class="form-group">
+      <label>Désignation fournisseur (telle qu'elle apparaît sur la facture)</label>
+      <input type="text" id="c-desig" value="${esc(prefixDesig)}" placeholder="TUBE CARRE INOX 304 50X50X2">
+    </div>
+    <div class="form-group">
+      <label>Fournisseur</label>
+      <input type="text" id="c-fourn" value="${esc(prefixFourn || db.settings.supplier || '')}" placeholder="BELMET">
+    </div>
+    <div class="form-group">
+      <label>Article interne correspondant</label>
+      <select id="c-article" style="width:100%">
+        <option value="">— Sélectionner —</option>
+        ${artOptions}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <input type="text" id="c-notes" placeholder="Remarques...">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-ghost" onclick="openAddArticleFromCorresp()" style="color:var(--primary);border-color:var(--primary)">➕ Nouvel article</button>
+      <button class="btn btn-primary" onclick="saveCorrespondance()">💾 Enregistrer</button>
+    </div>
+  `);
+}
+
+function openAddArticleFromCorresp() {
+  // Save current correspondance form state to restore after article creation
+  _correspReturnState = {
+    desig: document.getElementById('c-desig')?.value || '',
+    fourn: document.getElementById('c-fourn')?.value || '',
+    artId: parseInt(document.getElementById('c-article')?.value) || null,
+    notes: document.getElementById('c-notes')?.value || ''
+  };
+  const familles = uniq(db.articles.map(x => x.famille)).sort();
+  openModal(`
+    <div class="modal-title">Ajouter un article</div>
+    <p class="muted" style="font-size:12px;margin:-8px 0 12px">L'article créé sera automatiquement sélectionné dans la correspondance.</p>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Famille</label>
+        <input type="text" id="m-famille" list="familles-list2" placeholder="TUBE CARRE">
+        <datalist id="familles-list2">${familles.map(f=>`<option value="${esc(f)}">`).join('')}</datalist>
+      </div>
+      <div class="form-group">
+        <label>Matière</label>
+        <input type="text" id="m-matiere" placeholder="INOX 304">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Dimension caractéristique</label>
+        <input type="text" id="m-section" placeholder="50X50X2">
+      </div>
+      <div class="form-group">
+        <label>KG/M</label>
+        <input type="number" id="m-kgm" step="0.01" min="0">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Unité nomenclature</label>
+        <select id="m-unite">
+          <option value="M">M</option><option value="M2">M2</option>
+          <option value="U">U</option><option value="KG">KG</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Prix nomenclature</label>
+        <input type="number" id="m-prix" step="0.01" min="0">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="openAddCorrespondance(_correspReturnState?.desig||'',_correspReturnState?.fourn||'',_correspReturnState?.artId||null)">← Retour</button>
+      <button class="btn btn-primary" onclick="addNewArticleFromCorresp()">➕ Ajouter et revenir</button>
+    </div>
+  `);
+}
+
+function addNewArticleFromCorresp() {
+  const famille = document.getElementById('m-famille').value.trim();
+  const matiere = document.getElementById('m-matiere').value.trim();
+  const section = document.getElementById('m-section').value.trim();
+  if (!famille || !section) { toast('Famille et section obligatoires', 'err'); return; }
+  const kgm = parseFloat(document.getElementById('m-kgm').value);
+  const prix = parseFloat(document.getElementById('m-prix').value);
+  const unite = document.getElementById('m-unite').value;
+  const maxId = db.articles.reduce((m, a) => Math.max(m, a.id), 0);
+  const newArt = {
+    id: maxId + 1, famille, matiere: matiere || 'INOX 304', section,
+    kg_m: isNaN(kgm) ? null : kgm,
+    unite_nomen: unite, unite_fourn: null, coef_conv: null, prix_fourn: null,
+    dernier_fourn: null, derniere_facture: null, derniere_date: null, notes: ''
+  };
+  db.articles.push(newArt);
+  saveDB();
+  renderTarifs();
+  toast('Article ajouté — sélectionné dans la correspondance', 'ok');
+  const s = _correspReturnState || {};
+  openAddCorrespondance(s.desig || '', s.fourn || '', newArt.id);
+}
+
+function saveCorrespondance(existingId) {
+  const desig = document.getElementById('c-desig').value.trim();
+  const fourn = document.getElementById('c-fourn').value.trim();
+  const artId = parseInt(document.getElementById('c-article').value);
+  const notes = document.getElementById('c-notes').value.trim();
+
+  if (!desig) { toast('Désignation obligatoire', 'err'); return; }
+  if (!artId) { toast('Article obligatoire', 'err'); return; }
+
+  if (existingId) {
+    const c = db.correspondances.find(x => x.id === existingId);
+    if (c) { c.designation_fourn = desig; c.fournisseur = fourn; c.article_id = artId; c.notes = notes; }
+  } else {
+    db.correspondances.push({ id: genId(), designation_fourn: desig, fournisseur: fourn, article_id: artId, notes });
+  }
+
+  saveDB();
+  closeModal();
+  renderCorrespondances();
+  toast('Correspondance enregistrée', 'ok');
+}
+
+function editCorrespondance(id) {
+  const c = db.correspondances.find(x => x.id === id);
+  if (!c) return;
+  const arts = db.articles;
+  const artOptions = arts.map(a =>
+    `<option value="${a.id}" ${a.id === c.article_id ? 'selected' : ''}>${esc(a.famille)} — ${esc(a.section)} (${esc(a.matiere)})</option>`
+  ).join('');
+  openModal(`
+    <div class="modal-title">Modifier la correspondance</div>
+    <div class="form-group">
+      <label>Désignation fournisseur</label>
+      <input type="text" id="c-desig" value="${esc(c.designation_fourn)}">
+    </div>
+    <div class="form-group">
+      <label>Fournisseur</label>
+      <input type="text" id="c-fourn" value="${esc(c.fournisseur || '')}">
+    </div>
+    <div class="form-group">
+      <label>Article interne</label>
+      <select id="c-article" style="width:100%">
+        <option value="">— Sélectionner —</option>
+        ${artOptions}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <input type="text" id="c-notes" value="${esc(c.notes || '')}">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveCorrespondance('${id}')">💾 Enregistrer</button>
+    </div>
+  `);
+}
+
+function deleteCorrespondance(id) {
+  if (!confirm('Supprimer cette correspondance ?')) return;
+  db.correspondances = db.correspondances.filter(c => c.id !== id);
+  saveDB();
+  renderCorrespondances();
+  toast('Correspondance supprimée', 'ok');
+}
+
+// ============================================================
+// HISTORIQUE
+// ============================================================
+function clearHistColFilters() {
+  ['hcf-fourn','hcf-famille','hcf-matiere','hcf-unite'].forEach(id => { const e=document.getElementById(id); if(e) e.value=''; });
+  ['hcf-date','hcf-facture','hcf-section','hcf-desig','hcf-px-min','hcf-px-max','hcf-mt-min','hcf-mt-max'].forEach(id => { const e=document.getElementById(id); if(e) e.value=''; });
+  renderHistorique();
+}
+
+function renderHistorique() {
+  populateFilterDropdowns();
+  const fFourn   = document.getElementById('h-fourn')?.value || '';
+  const fFamille = document.getElementById('h-famille')?.value || '';
+  const fFrom    = document.getElementById('h-from')?.value || '';
+  const fTo      = document.getElementById('h-to')?.value || '';
+  const fSearch  = (document.getElementById('h-search')?.value || '').toLowerCase();
+  // Filtres colonnes
+  const hDate    = (document.getElementById('hcf-date')?.value || '').toLowerCase();
+  const hFourn   = document.getElementById('hcf-fourn')?.value || '';
+  const hFacture = (document.getElementById('hcf-facture')?.value || '').toLowerCase();
+  const hFamille = document.getElementById('hcf-famille')?.value || '';
+  const hMatiere = document.getElementById('hcf-matiere')?.value || '';
+  const hSection = (document.getElementById('hcf-section')?.value || '').toLowerCase();
+  const hDesig   = (document.getElementById('hcf-desig')?.value || '').toLowerCase();
+  const hUnite   = document.getElementById('hcf-unite')?.value || '';
+  const hPxMin   = parseFloat(document.getElementById('hcf-px-min')?.value);
+  const hPxMax   = parseFloat(document.getElementById('hcf-px-max')?.value);
+  const hMtMin   = parseFloat(document.getElementById('hcf-mt-min')?.value);
+  const hMtMax   = parseFloat(document.getElementById('hcf-mt-max')?.value);
+
+  const filtered = db.lignes.filter(l => {
+    if (fFourn && l.fournisseur !== fFourn) return false;
+    if (fFamille && l.famille !== fFamille) return false;
+    if (fFrom && l.date < fFrom) return false;
+    if (fTo && l.date > fTo) return false;
+    if (fSearch && !l.designation_fourn.toLowerCase().includes(fSearch) &&
+        !(l.famille || '').toLowerCase().includes(fSearch) &&
+        !(l.section || '').toLowerCase().includes(fSearch)) return false;
+    // Filtres colonnes
+    if (hDate && !fmtDate(l.date).toLowerCase().includes(hDate)) return false;
+    if (hFourn && l.fournisseur !== hFourn) return false;
+    if (hFacture && !(l.numero_facture || '').toLowerCase().includes(hFacture)) return false;
+    if (hFamille && l.famille !== hFamille) return false;
+    if (hMatiere && l.matiere !== hMatiere) return false;
+    if (hSection && !(l.section || '').toLowerCase().includes(hSection)) return false;
+    if (hDesig && !(l.designation_fourn || '').toLowerCase().includes(hDesig)) return false;
+    if (hUnite && l.unite !== hUnite) return false;
+    if (!isNaN(hPxMin) && (l.prix_unitaire === null || l.prix_unitaire < hPxMin)) return false;
+    if (!isNaN(hPxMax) && (l.prix_unitaire === null || l.prix_unitaire > hPxMax)) return false;
+    if (!isNaN(hMtMin) && (l.montant === null || l.montant < hMtMin)) return false;
+    if (!isNaN(hMtMax) && (l.montant === null || l.montant > hMtMax)) return false;
+    return true;
+  }).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+  let html = '';
+  if (!filtered.length) {
+    html = `<tr><td colspan="11" class="empty-state"><div class="es-icon">📈</div><p>Aucune ligne d'historique</p><p class="muted" style="font-size:13px;margin-top:8px">Les achats apparaîtront ici après import de factures.</p></td></tr>`;
+  } else {
+    filtered.forEach(l => {
+      html += `<tr>
+        <td class="nowrap muted">${fmtDate(l.date)}</td>
+        <td><span class="badge badge-blue">${esc(l.fournisseur || '—')}</span></td>
+        <td class="mono" style="font-size:12px">${esc(l.numero_facture || '—')}</td>
+        <td>${esc(l.famille || '—')}</td>
+        <td><span class="badge badge-grey">${esc(l.matiere || '—')}</span></td>
+        <td class="bold">${esc(l.section || '—')}</td>
+        <td style="font-size:12px;max-width:220px;overflow:hidden;text-overflow:ellipsis">${esc(l.designation_fourn)}</td>
+        <td class="text-right">${fmt(l.quantite, 2)}</td>
+        <td><span class="badge badge-blue">${esc(l.unite || '—')}</span></td>
+        <td class="price-cell text-right">${fmt(l.prix_unitaire, 3)}</td>
+        <td class="price-cell text-right">${fmt(l.montant, 2)}</td>
+      </tr>`;
+    });
+  }
+  document.getElementById('hist-body').innerHTML = html;
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function renderSettings() {
+  if (currentUser?.role === 'admin') renderUsers();
+  const statusEl = document.getElementById('claude-status-text');
+  if (statusEl) {
+    statusEl.textContent = claudeConfigured === true ? '✅ Clé API configurée sur le serveur'
+      : claudeConfigured === false ? '⚠️ Clé API non configurée sur le serveur'
+      : 'Vérification...';
+  }
+  document.getElementById('claude-model').value = db.settings.model || 'claude-opus-5';
+  document.getElementById('info-articles').textContent = db.articles.length;
+  document.getElementById('info-corr').textContent = db.correspondances.length;
+  document.getElementById('info-factures').textContent = db.factures.length;
+  document.getElementById('info-lignes').textContent = db.lignes.length;
+  document.getElementById('info-save').textContent = db.savedAt ? fmtDate(db.savedAt) : 'Jamais';
+}
+
+function saveClaudeModel() {
+  db.settings.model = document.getElementById('claude-model').value;
+  saveDB();
+  toast('Modèle enregistré', 'ok');
+}
+
+// ============================================================
+// AIDE
+// ============================================================
+function openHelp() {
+  const sections = [
+    {
+      icon: '📋', title: 'Tableau Tarifs',
+      body: `
+        <p>Le tableau central liste tous vos articles inox avec leur <strong>dernier prix d'achat</strong> et le <strong>prix ramené à l'unité de nomenclature</strong>.</p>
+        <ul>
+          <li><strong>Prix unitaire (€/unité)</strong> = Prix fournisseur × Coefficient de conversion</li>
+          <li>Cliquez sur une valeur soulignée pour l'éditer directement dans le tableau</li>
+          <li>Utilisez les filtres en haut pour chercher par famille, matière ou section</li>
+          <li>Les filtres par colonne (ligne grise sous les en-têtes) permettent un affinage précis</li>
+          <li>Cliquez sur un en-tête de colonne pour trier</li>
+        </ul>
+        <div class="tip">⚠️ Une ligne en jaune signifie qu'un prix fournisseur existe mais que le coefficient de conversion est manquant — le prix unitaire ne peut pas être calculé.</div>
+        <div class="note">✅ Les boutons <strong>Export CSV</strong> et <strong>Export Excel</strong> exportent les articles affichés (selon les filtres actifs pour le CSV, tous les articles pour le Excel).</div>
+      `
+    },
+    {
+      icon: '📄', title: 'Importer une Facture',
+      body: `
+        <p>Cette fonction extrait automatiquement les prix depuis une facture PDF fournisseur grâce à l'IA Claude.</p>
+        <ul>
+          <li>Déposez ou sélectionnez un fichier PDF de facture</li>
+          <li>L'IA analyse le document et détecte les lignes d'achat</li>
+          <li>Chaque ligne est rapprochée d'un article existant dans TIG</li>
+          <li>Vérifiez les correspondances proposées avant de valider</li>
+          <li>Les prix mis à jour sont enregistrés dans l'historique</li>
+        </ul>
+        <div class="tip">⚠️ Une clé API Claude doit être configurée dans les Paramètres (admin) pour utiliser cette fonction.</div>
+      `
+    },
+    {
+      icon: '🔗', title: 'Correspondances',
+      body: `
+        <p>Les correspondances font le lien entre les <strong>désignations fournisseur</strong> (telles qu'elles apparaissent sur les factures) et les <strong>articles TIG</strong>.</p>
+        <ul>
+          <li>À chaque import, les correspondances validées sont mémorisées</li>
+          <li>Elles accélèrent les imports suivants du même fournisseur</li>
+          <li>Vous pouvez créer, modifier ou supprimer des correspondances manuellement</li>
+          <li>Le bouton <strong>+ Nouvel article</strong> permet de créer un article directement depuis cette vue</li>
+        </ul>
+      `
+    },
+    {
+      icon: '📈', title: 'Historique',
+      body: `
+        <p>L'historique conserve toutes les lignes d'achat importées depuis les factures fournisseurs.</p>
+        <ul>
+          <li>Filtrez par date, fournisseur, N° de facture ou article</li>
+          <li>Cliquez sur le badge 🔍 d'une ligne du tableau tarifs pour filtrer l'historique sur cette facture</li>
+          <li>Le PDF de la facture est accessible via l'icône 📄 si il a été joint à l'import</li>
+          <li>Export CSV disponible pour analyse externe</li>
+        </ul>
+      `
+    },
+    {
+      icon: '⚙️', title: 'Paramètres',
+      body: `
+        <p>Accessible à tous les utilisateurs pour certaines fonctions, à l'administrateur pour les autres.</p>
+        <ul>
+          <li><strong>Clé API Claude</strong> (admin) — nécessaire pour l'import automatique de factures</li>
+          <li><strong>Gestion des utilisateurs</strong> (admin) — créer, modifier, supprimer des comptes</li>
+          <li><strong>Sauvegarde JSON</strong> (admin) — exporter ou restaurer toute la base de données</li>
+          <li><strong>Changer mon mot de passe</strong> — accessible à tous</li>
+        </ul>
+        <div class="note">✅ Les données sont partagées en temps réel entre tous les utilisateurs connectés.</div>
+      `
+    }
+  ];
+
+  const sectionsHTML = sections.map((s, i) => `
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAccordion(${i})">
+        <span><span class="acc-icon">${s.icon}</span>${s.title}</span>
+        <span class="accordion-chevron" id="acc-chev-${i}">▼</span>
+      </div>
+      <div class="accordion-body" id="acc-body-${i}">${s.body}</div>
+    </div>
+  `).join('');
+
+  openModal(`
+    <div class="modal-title">? Aide — Guide d'utilisation TIG</div>
+    <div class="help-intro">
+      <strong>TIG</strong> (Tech Inox Gestion) est l'outil de gestion tarifaire de <strong>Techinox SARL</strong>.<br>
+      Il centralise les prix d'achat de vos fournitures inox, importe vos factures fournisseurs et suit l'évolution des prix dans le temps.<br><br>
+      Cliquez sur une section ci-dessous pour afficher le détail.
+    </div>
+    ${sectionsHTML}
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeModal()">Fermer</button>
+    </div>
+  `);
+}
+
+function toggleAccordion(i) {
+  const body = document.getElementById('acc-body-' + i);
+  const chev = document.getElementById('acc-chev-' + i);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chev.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(db, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `TIG_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Sauvegarde exportée', 'ok');
+}
+
+function importJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.articles) throw new Error('Format invalide');
+      if (!confirm(`Restaurer ${data.articles.length} articles, ${data.correspondances?.length || 0} correspondances, ${data.lignes?.length || 0} lignes d'historique ?`)) return;
+      db = data;
+      saveDB();
+      renderTarifs();
+      renderSettings();
+      toast('Données restaurées', 'ok');
+    } catch(err) {
+      toast('Erreur lors de la restauration : ' + err.message, 'err');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// Réinitialise les infos tarifaires/fournisseur de chaque article (prix, coef,
+// dernier fournisseur, dates, notes) sans supprimer le catalogue lui-même.
+function resetInfosProduits() {
+  if (!confirm('Réinitialiser les infos produits ? Les prix, fournisseurs, dates et l\'historique des factures seront effacés. Les articles (famille/matière/dimension) sont conservés. Action irréversible.')) return;
+  db.articles.forEach(a => {
+    a.unite_fourn = null;
+    a.coef_conv = null;
+    a.prix_fourn = null;
+    a.dernier_fourn = null;
+    a.derniere_facture = null;
+    a.derniere_date = null;
+    a.derniere_facture_pdf = null;
+    a.notes = '';
+  });
+  db.factures = [];
+  db.lignes = [];
+  saveDB();
+  renderTarifs();
+  renderHistorique();
+  renderSettings();
+  toast('Infos produits réinitialisées', 'ok');
+}
+
+// Supprime tout : articles, correspondances, factures, historique.
+// Le catalogue repart à 0 produit (les paramètres — clé API, modèle — sont conservés).
+function deleteAllData() {
+  if (!confirm('Tout supprimer ? Tous les articles, correspondances, factures et l\'historique seront définitivement effacés (0 produit). Action irréversible.')) return;
+  db.articles = [];
+  db.correspondances = [];
+  db.factures = [];
+  db.lignes = [];
+  saveDB();
+  renderTarifs();
+  renderCorrespondances();
+  renderHistorique();
+  renderSettings();
+  toast('Toutes les données ont été supprimées', 'ok');
+}
+
+// ============================================================
+// EXPORTS CSV
+// ============================================================
+function exportCSV() {
+  const articles = getFilteredArticles();
+  const headers = ['Famille','Matière','Dimension caractéristique','Unité Nomen.','Prix calc. (€/unité)','Unité Fourn.','Coef Conv.','Prix Fourn. (€)','Dernier Fournisseur','Dernière Facture','Date MAJ'];
+  const rows = articles.map(a => {
+    const prixCalc = (a.prix_fourn !== null && a.coef_conv !== null) ? (a.prix_fourn * a.coef_conv).toFixed(4) : '';
+    return [
+      a.famille, a.matiere, a.section, a.unite_nomen,
+      prixCalc.replace('.', ','),
+      a.unite_fourn ?? '',
+      a.coef_conv?.toString().replace('.', ',') ?? '',
+      a.prix_fourn?.toString().replace('.', ',') ?? '',
+      a.dernier_fourn ?? '',
+      a.derniere_facture ?? '',
+      a.derniere_date ? fmtDate(a.derniere_date) : ''
+    ];
+  });
+  downloadCSV('tarifs_matières.csv', [headers, ...rows]);
+  toast('Export CSV téléchargé', 'ok');
+}
+
+function exportXLSX() {
+  const articles = db.articles;
+  const date = new Date().toISOString().slice(0, 10);
+
+  // En-têtes
+  const headers = [
+    'Famille', 'Matière', 'Dimension caractéristique',
+    'Unité nomenclature',
+    'Prix unitaire (€/unité nomen.)',
+    'Dernier fournisseur', 'Dernière facture', 'Date MAJ'
+  ];
+
+  // Lignes
+  const rows = articles.map(a => {
+    const prixCalc = (a.prix_fourn !== null && a.coef_conv !== null)
+      ? parseFloat((a.prix_fourn * a.coef_conv).toFixed(4))
+      : null;
+    return [
+      a.famille ?? '',
+      a.matiere ?? '',
+      a.section ?? '',
+      a.unite_nomen ?? '',
+      prixCalc,
+      a.dernier_fourn ?? '',
+      a.derniere_facture ?? '',
+      a.derniere_date ? fmtDate(a.derniere_date) : ''
+    ];
+  });
+
+  // Création feuille
+  const wsData = [headers, ...rows];
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  // Largeurs de colonnes
+  ws['!cols'] = [
+    {wch:16}, {wch:20}, {wch:18},
+    {wch:18}, {wch:26},
+    {wch:22}, {wch:20}, {wch:14}
+  ];
+
+  // Format numérique pour la colonne prix (colonne E = index 4)
+  rows.forEach((_, i) => {
+    const cellRef = XLSX.utils.encode_cell({r: i + 1, c: 4});
+    if (ws[cellRef] && ws[cellRef].v !== null && ws[cellRef].v !== undefined) {
+      ws[cellRef].t = 'n';
+      ws[cellRef].z = '#,##0.0000 "€"';
+    }
+  });
+
+  // Création classeur
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Tarifs');
+
+  // Téléchargement
+  XLSX.writeFile(wb, `TIG_tarifs_${date}.xlsx`);
+  toast('Export Excel téléchargé', 'ok');
+}
+
+function exportHistoriqueCSV() {
+  const headers = ['Date','Fournisseur','N° Facture','Famille','Matière','Dimension caractéristique','Désignation','Qté','Unité','Prix unit.','Montant'];
+  const rows = [...db.lignes].sort((a,b) => (b.date||'').localeCompare(a.date||'')).map(l => [
+    fmtDate(l.date), l.fournisseur, l.numero_facture, l.famille, l.matiere, l.section,
+    l.designation_fourn, l.quantite?.toString().replace('.', ',') ?? '',
+    l.unite, l.prix_unitaire?.toString().replace('.', ',') ?? '',
+    l.montant?.toString().replace('.', ',') ?? ''
+  ]);
+  downloadCSV('historique_achats.csv', [headers, ...rows]);
+  toast('Export CSV téléchargé', 'ok');
+}
+
+function downloadCSV(filename, rows) {
+  const bom = '\uFEFF';
+  const content = bom + rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(';')).join('\r\n');
+  const blob = new Blob([content], {type: 'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+// ============================================================
+// GESTION USERS (admin)
+// ============================================================
+async function renderUsers() {
+  const el = document.getElementById('users-list');
+  if (!el) return;
+  try {
+    const res   = await fetch('/api/users', { headers: authHeader() });
+    if (!res.ok) return;
+    const users = await res.json();
+    el.innerHTML = users.map(u => `
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+        <span style="flex:1;font-size:13px"><b>${esc(u.username)}</b></span>
+        <span class="badge ${u.role === 'admin' ? 'badge-blue' : 'badge-grey'}">${u.role}</span>
+        <button class="btn btn-xs" style="background:#e3f2fd;color:#1565c0" onclick="prefillUserForm('${esc(u.username)}','${u.role}')">✏️</button>
+        ${u.username !== currentUser?.username
+          ? `<button class="btn btn-xs" style="background:#ffebee;color:#c62828" onclick="deleteUser('${esc(u.username)}')">🗑</button>`
+          : '<span class="muted" style="font-size:11px">(vous)</span>'}
+      </div>`).join('');
+  } catch(e) {}
+}
+
+async function saveUser() {
+  const username = document.getElementById('nu-username').value.trim();
+  const password = document.getElementById('nu-password').value;
+  const role     = document.getElementById('nu-role').value;
+  if (!username) { toast('Identifiant requis', 'err'); return; }
+  const res = await fetch('/api/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    body: JSON.stringify({ username, password, role })
+  });
+  const data = await res.json();
+  if (!res.ok) { toast(data.error || 'Erreur', 'err'); return; }
+  toast('Utilisateur enregistré', 'ok');
+  document.getElementById('nu-username').value = '';
+  document.getElementById('nu-password').value = '';
+  renderUsers();
+}
+
+async function deleteUser(username) {
+  if (!confirm(`Supprimer l'utilisateur "${username}" ?`)) return;
+  const res  = await fetch('/api/users/' + encodeURIComponent(username), { method: 'DELETE', headers: authHeader() });
+  const data = await res.json();
+  if (!res.ok) { toast(data.error || 'Erreur', 'err'); return; }
+  toast('Utilisateur supprimé', 'ok');
+  renderUsers();
+}
+
+function prefillUserForm(username, role) {
+  document.getElementById('nu-username').value = username;
+  document.getElementById('nu-password').value = '';
+  document.getElementById('nu-role').value = role;
+  document.getElementById('nu-password').focus();
+  document.getElementById('nu-password').placeholder = 'Nouveau mot de passe';
+}
+
+async function changePassword() {
+  const old_password = document.getElementById('cp-old').value;
+  const new_password = document.getElementById('cp-new').value;
+  if (!old_password || !new_password) { toast('Remplissez les deux champs', 'err'); return; }
+  const res  = await fetch('/api/change-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeader() },
+    body: JSON.stringify({ old_password, new_password })
+  });
+  const data = await res.json();
+  if (!res.ok) { toast(data.error || 'Erreur', 'err'); return; }
+  toast('Mot de passe modifié', 'ok');
+  document.getElementById('cp-old').value = '';
+  document.getElementById('cp-new').value = '';
+}
+
+async function loadClaudeStatus() {
+  try {
+    const res = await fetch('/api/claude-status', { headers: authHeader() });
+    claudeConfigured = res.ok ? !!(await res.json()).configured : null;
+  } catch(e) {
+    claudeConfigured = null;
+  }
+}
+
+async function init() {
+  loadSession();
+  if (!currentUser) return; // l'écran de login reste visible
+  applySession();
+  renderTarifs(); // affichage immédiat
+  await Promise.all([loadDB(), loadClaudeStatus()]); // charge depuis le serveur
+  renderTarifs(); // re-render avec les données partagées — recalcule aussi ce bandeau
+  if (document.getElementById('panel-settings')?.classList.contains('active')) renderSettings();
+}
+
+init();
+</script>
+</body>
+</html>
