@@ -1772,6 +1772,23 @@ function detectMatiere(desig) {
 }
 
 // ── RENDER IMPORT REVIEW ─────────────────────────────────────
+const UNITE_FOURN_OPTIONS = ['ML', 'KG', 'BA', 'FE', 'M2', 'U'];
+
+// Menu déroulant d'unité fournisseur pour une ligne de facture — pré-rempli avec
+// le choix de Claude, modifiable avant confirmation de l'import.
+function uniteSelect(currentUnite, idx) {
+  const opts = UNITE_FOURN_OPTIONS.slice();
+  if (currentUnite && !opts.includes(currentUnite)) opts.push(currentUnite); // valeur inattendue de l'extraction — on ne la perd pas silencieusement
+  return `<select class="unite-select" onchange="updateLigneUnite(${idx},this.value)" style="font-size:12px;padding:3px 6px;border:1px solid var(--border);border-radius:4px" title="Unité extraite par Claude — modifiable">
+    ${opts.map(u => `<option value="${u}" ${u === currentUnite ? 'selected' : ''}>${u}</option>`).join('')}
+  </select>`;
+}
+
+function updateLigneUnite(idx, unite) {
+  if (!importData) return;
+  importData.matches[idx].ligne.unite = unite;
+}
+
 function renderImportReview(matches) {
   const unmatched = matches.filter(m => !m.articleId).length;
   const alertEl = document.getElementById('import-unmatched-alert');
@@ -1809,7 +1826,7 @@ function renderImportReview(matches) {
         ${l.code_article ? `<div class="muted" style="font-size:11px">Code: ${esc(l.code_article)}</div>` : ''}
       </td>
       <td class="text-right">${fmt(l.quantite, 3)}</td>
-      <td><span class="badge badge-blue">${esc(l.unite)}</span></td>
+      <td>${uniteSelect(l.unite, i)}</td>
       <td class="price-cell text-right">${fmt(l.prix_unitaire, 3)}</td>
       <td class="price-cell text-right">${fmt(l.montant_ligne)}</td>
       <td>
