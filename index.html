@@ -338,7 +338,7 @@ th.has-filter .sort-icon{color:var(--primary);opacity:1}
     <div class="filter-bar" style="margin-bottom:0">
       <select id="f-famille" onchange="renderTarifs()"><option value="">— Toutes familles —</option></select>
       <select id="f-matiere" onchange="renderTarifs()"><option value="">— Toutes matières —</option></select>
-      <input id="f-search" type="text" placeholder="🔍 Recherche dimension..." oninput="renderTarifs()" style="width:200px">
+      <input id="f-search" type="text" placeholder="🔍 Recherche code/dimension..." oninput="renderTarifs()" style="width:200px">
       <select id="f-status" onchange="renderTarifs()">
         <option value="">Tous les statuts</option>
         <option value="updated">Prix mis à jour</option>
@@ -367,6 +367,7 @@ th.has-filter .sort-icon{color:var(--primary);opacity:1}
     <table id="tarifs-table">
       <thead>
         <tr>
+          <th onclick="sortTarifs('code')">Code <span class="sort-icon">↕</span></th>
           <th onclick="sortTarifs('famille')">Famille <span class="sort-icon">↕</span></th>
           <th onclick="sortTarifs('matiere')">Matière <span class="sort-icon">↕</span></th>
           <th onclick="sortTarifs('section')">Dimension caractéristique <span class="sort-icon">↕</span></th>
@@ -381,6 +382,7 @@ th.has-filter .sort-icon{color:var(--primary);opacity:1}
           <th style="text-align:center"><button class="btn btn-xs" onclick="clearColFilters()" title="Effacer tous les filtres colonnes" style="background:#e0e0e0;color:#555;font-size:10px;padding:2px 7px">✕ Filtres</button></th>
         </tr>
         <tr class="filter-row" id="filter-row">
+          <th><input id="cf-code" class="col-filter" type="text" placeholder="Filtrer code..." oninput="renderTarifs()"></th>
           <th><select id="cf-famille" class="col-filter" onchange="renderTarifs()"><option value="">Toutes</option></select></th>
           <th><select id="cf-matiere" class="col-filter" onchange="renderTarifs()"><option value="">Toutes</option></select></th>
           <th><input id="cf-section" class="col-filter" type="text" placeholder="Filtrer dimension..." oninput="renderTarifs()"></th>
@@ -532,6 +534,10 @@ th.has-filter .sort-icon{color:var(--primary);opacity:1}
         <div class="card-title">🔀 Correspondance des colonnes</div>
         <p class="muted" style="font-size:12px;margin-bottom:12px" id="prod-file-info"></p>
         <div class="form-group">
+          <label>Code</label>
+          <select id="pm-code" onchange="analyzeProduitsImport()"></select>
+        </div>
+        <div class="form-group">
           <label>Famille *</label>
           <select id="pm-famille" onchange="analyzeProduitsImport()"></select>
         </div>
@@ -590,6 +596,7 @@ th.has-filter .sort-icon{color:var(--primary);opacity:1}
           <tr>
             <th></th>
             <th>Statut</th>
+            <th>Code</th>
             <th>Famille</th>
             <th>Matière</th>
             <th>Dimension caractéristique</th>
@@ -916,6 +923,7 @@ async function loadDB() {
   db.articles.forEach(a => {
     if (a.prix_fourn === undefined) a.prix_fourn = a.prix_fourn_max ?? null;
     delete a.prix_nomen; delete a.prix_fourn_max; delete a.prix_fourn_moy; delete a.nb_achats;
+    if (a.code === undefined) a.code = null;
   });
   // Migration sécurité : la clé API Claude ne doit plus jamais vivre côté client —
   // purge toute trace résiduelle d'une ancienne version (db.json, localStorage).
@@ -1015,6 +1023,7 @@ function getFilteredArticles() {
   const fSearch = (document.getElementById('f-search')?.value || '').toLowerCase().trim();
   const fStatus = document.getElementById('f-status')?.value || '';
   // Column filters
+  const cfCode       = (document.getElementById('cf-code')?.value || '').toLowerCase().trim();
   const cfFamille    = document.getElementById('cf-famille')?.value || '';
   const cfMatiere    = document.getElementById('cf-matiere')?.value || '';
   const cfSection    = (document.getElementById('cf-section')?.value || '').toLowerCase().trim();
@@ -1033,11 +1042,12 @@ function getFilteredArticles() {
     // Top bar
     if (fFamille && a.famille !== fFamille) return false;
     if (fMatiere && a.matiere !== fMatiere) return false;
-    if (fSearch && !a.section.toLowerCase().includes(fSearch) && !a.famille.toLowerCase().includes(fSearch)) return false;
+    if (fSearch && !a.section.toLowerCase().includes(fSearch) && !a.famille.toLowerCase().includes(fSearch) && !(a.code || '').toLowerCase().includes(fSearch)) return false;
     if (fStatus === 'updated' && !a.derniere_date) return false;
     if (fStatus === 'missing_coef' && (a.coef_conv !== null || !a.derniere_date)) return false;
     if (fStatus === 'no_invoice' && a.derniere_date) return false;
     // Column filters
+    if (cfCode && !(a.code || '').toLowerCase().includes(cfCode)) return false;
     if (cfFamille && a.famille !== cfFamille) return false;
     if (cfMatiere && a.matiere !== cfMatiere) return false;
     if (cfSection && !a.section.toLowerCase().includes(cfSection)) return false;
@@ -1075,7 +1085,7 @@ function clearColFilters() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
-  ['cf-section','cf-prix-min','cf-prix-max','cf-pf-min','cf-pf-max'].forEach(id => {
+  ['cf-code','cf-section','cf-prix-min','cf-prix-max','cf-pf-min','cf-pf-max'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -1086,10 +1096,10 @@ function clearColFilters() {
 function updateColFilterHighlights() {
   // Highlight header cells that have an active column filter
   const colMap = {
-    0: 'cf-famille', 1: 'cf-matiere', 2: 'cf-section',
-    3: 'cf-unite-nomen', 4: ['cf-prix-min','cf-prix-max'],
-    5: 'cf-unite-fourn', 6: 'cf-coef', 7: ['cf-pf-min','cf-pf-max'],
-    8: 'cf-fourn', 9: 'cf-maj', 10: 'cf-statut'
+    0: 'cf-code', 1: 'cf-famille', 2: 'cf-matiere', 3: 'cf-section',
+    4: 'cf-unite-nomen', 5: ['cf-prix-min','cf-prix-max'],
+    6: 'cf-unite-fourn', 7: 'cf-coef', 8: ['cf-pf-min','cf-pf-max'],
+    9: 'cf-fourn', 10: 'cf-maj', 11: 'cf-statut'
   };
   const headerCells = document.querySelectorAll('#tarifs-table thead tr:first-child th');
   headerCells.forEach((th, i) => {
@@ -1187,7 +1197,7 @@ function renderTarifs() {
 
   articles.forEach(a => {
     if (a.famille !== lastFamille) {
-      html += `<tr class="tr-section"><td colspan="12">${esc(a.famille)}</td></tr>`;
+      html += `<tr class="tr-section"><td colspan="13">${esc(a.famille)}</td></tr>`;
       lastFamille = a.famille;
     }
 
@@ -1229,6 +1239,7 @@ function renderTarifs() {
       : '';
 
     html += `<tr${needsCoef ? ' style="background:#fffde7"' : ''}>
+      <td class="mono">${a.code ? esc(a.code) : '<span class="muted">—</span>'}</td>
       <td>${esc(a.famille)}</td>
       <td><span class="badge badge-grey">${esc(a.matiere)}</span></td>
       <td class="bold">${esc(a.section)}</td>
@@ -1247,7 +1258,7 @@ function renderTarifs() {
     </tr>`;
   });
 
-  if (!html) html = `<tr><td colspan="12" class="empty-state"><div class="es-icon">🔍</div><p>Aucun article ne correspond aux filtres</p></td></tr>`;
+  if (!html) html = `<tr><td colspan="13" class="empty-state"><div class="es-icon">🔍</div><p>Aucun article ne correspond aux filtres</p></td></tr>`;
 
   document.getElementById('tarifs-body').innerHTML = html;
 
@@ -1321,36 +1332,40 @@ function editArticle(id) {
     <div class="modal-title">Modifier l'article — ${esc(a.famille)} ${esc(a.section)}</div>
     <div class="form-row">
       <div class="form-group">
+        <label>Code</label>
+        <input type="text" id="m-code" value="${esc(a.code || '')}" placeholder="ex: TR-INOX-30401">
+      </div>
+      <div class="form-group">
         <label>Famille</label>
         <input type="text" id="m-famille" value="${esc(a.famille)}" list="familles-list">
         <datalist id="familles-list">${familles.map(f=>`<option value="${esc(f)}">`).join('')}</datalist>
       </div>
+    </div>
+    <div class="form-row">
       <div class="form-group">
         <label>Matière</label>
         <input type="text" id="m-matiere" value="${esc(a.matiere)}">
       </div>
-    </div>
-    <div class="form-row">
       <div class="form-group">
         <label>Dimension caractéristique / Désignation</label>
         <input type="text" id="m-section" value="${esc(a.section)}">
       </div>
+    </div>
+    <div class="form-row">
       <div class="form-group">
         <label>KG/M (ou KG/M²)</label>
         <input type="number" id="m-kgm" value="${a.kg_m ?? ''}" step="0.01" min="0">
       </div>
-    </div>
-    <div class="form-row">
       <div class="form-group">
         <label>Unité nomenclature</label>
         <select id="m-unite">
           ${['M','M2','U','KG'].map(u=>`<option value="${u}" ${a.unite_nomen===u?'selected':''}>${u}</option>`).join('')}
         </select>
       </div>
-      <div class="form-group">
-        <label>Prix calculé (lecture seule)</label>
-        <input type="text" disabled value="${a.prix_fourn !== null && a.coef_conv !== null ? fmt(a.prix_fourn * a.coef_conv) + ' €/' + a.unite_nomen : '— (coef non saisi)'}" style="background:#f5f5f5;color:#888">
-      </div>
+    </div>
+    <div class="form-group">
+      <label>Prix calculé (lecture seule)</label>
+      <input type="text" disabled value="${a.prix_fourn !== null && a.coef_conv !== null ? fmt(a.prix_fourn * a.coef_conv) + ' €/' + a.unite_nomen : '— (coef non saisi)'}" style="background:#f5f5f5;color:#888">
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
@@ -1362,6 +1377,7 @@ function editArticle(id) {
 function saveArticle(id) {
   const a = db.articles.find(x => x.id === id);
   if (!a) return;
+  a.code = document.getElementById('m-code').value.trim() || null;
   a.famille = document.getElementById('m-famille').value.trim();
   a.matiere = document.getElementById('m-matiere').value.trim();
   a.section = document.getElementById('m-section').value.trim();
@@ -1380,26 +1396,30 @@ function openAddArticle() {
     <div class="modal-title">Ajouter un article</div>
     <div class="form-row">
       <div class="form-group">
+        <label>Code</label>
+        <input type="text" id="m-code" placeholder="ex: TR-INOX-30401">
+      </div>
+      <div class="form-group">
         <label>Famille</label>
         <input type="text" id="m-famille" list="familles-list" placeholder="TUBE CARRE">
         <datalist id="familles-list">${familles.map(f=>`<option value="${esc(f)}">`).join('')}</datalist>
       </div>
+    </div>
+    <div class="form-row">
       <div class="form-group">
         <label>Matière</label>
         <input type="text" id="m-matiere" placeholder="INOX 304">
       </div>
-    </div>
-    <div class="form-row">
       <div class="form-group">
         <label>Dimension caractéristique</label>
         <input type="text" id="m-section" placeholder="50X50X2">
       </div>
+    </div>
+    <div class="form-row">
       <div class="form-group">
         <label>KG/M</label>
         <input type="number" id="m-kgm" step="0.01" min="0">
       </div>
-    </div>
-    <div class="form-row">
       <div class="form-group">
         <label>Unité nomenclature</label>
         <select id="m-unite">
@@ -1416,6 +1436,7 @@ function openAddArticle() {
 }
 
 function addNewArticle() {
+  const code = document.getElementById('m-code').value.trim();
   const famille = document.getElementById('m-famille').value.trim();
   const matiere = document.getElementById('m-matiere').value.trim();
   const section = document.getElementById('m-section').value.trim();
@@ -1424,7 +1445,7 @@ function addNewArticle() {
   const unite = document.getElementById('m-unite').value;
   const maxId = db.articles.reduce((m, a) => Math.max(m, a.id), 0);
   db.articles.push({
-    id: maxId + 1, famille, matiere: matiere || 'INOX 304', section,
+    id: maxId + 1, code: code || null, famille, matiere: matiere || 'INOX 304', section,
     kg_m: isNaN(kgm) ? null : kgm,
     unite_nomen: unite, unite_fourn: null, coef_conv: null, prix_fourn: null,
     dernier_fourn: null, derniere_facture: null, derniere_date: null, notes: ''
@@ -1995,6 +2016,7 @@ function setImportStatus(type, msg) {
 let produitsImportData = null; // { headers, rows: raw file rows, mapping, reviewRows }
 
 const PROD_FIELD_ALIASES = {
+  code:     ['code', 'codearticle', 'codeproduit', 'sku', 'codesku', 'codeinterne'],
   famille:  ['famille', 'family', 'categorie', 'catégorie'],
   matiere:  ['matiere', 'matière', 'materiau', 'matériau', 'material', 'nuance'],
   section:  ['section', 'dimension', 'dimensioncaracteristique', 'dimensioncaractéristique', 'diametre', 'diamètre', 'reference', 'référence', 'designation', 'désignation'],
@@ -2055,6 +2077,7 @@ async function processProduitsFile(file) {
 
     // Pré-remplit les <select> de correspondance de colonnes
     const fields = [
+      ['pm-code', 'code', false],
       ['pm-famille', 'famille', true],
       ['pm-matiere', 'matiere', false],
       ['pm-section', 'section', true],
@@ -2097,6 +2120,7 @@ function analyzeProduitsImport() {
   if (!produitsImportData) return;
   const { headers, dataRows } = produitsImportData;
 
+  const colCode    = document.getElementById('pm-code').value;
   const colFamille = document.getElementById('pm-famille').value;
   const colMatiere = document.getElementById('pm-matiere').value;
   const colSection = document.getElementById('pm-section').value;
@@ -2114,6 +2138,7 @@ function analyzeProduitsImport() {
 
   const seenInFile = new Set(); // détecte les doublons à l'intérieur du fichier importé
   const reviewRows = dataRows.map(r => {
+    const code    = colCode !== '' ? String(r[colCode] ?? '').trim() : '';
     const famille = String(r[colFamille] ?? '').trim();
     const matiere = colMatiere !== '' ? String(r[colMatiere] ?? '').trim() : '';
     const section = String(r[colSection] ?? '').trim();
@@ -2123,7 +2148,7 @@ function analyzeProduitsImport() {
     if (!['M', 'M2', 'U', 'KG'].includes(unite)) unite = '';
 
     if (!famille || !section) {
-      return { famille, matiere, section, kg_m: kgm, unite_nomen: unite, status: 'invalid', include: false };
+      return { code, famille, matiere, section, kg_m: kgm, unite_nomen: unite, status: 'invalid', include: false };
     }
 
     const key = prodKey(famille, matiere, section);
@@ -2132,12 +2157,12 @@ function analyzeProduitsImport() {
     const existing = existingByKey.get(key);
 
     if (dup) {
-      return { famille, matiere, section, kg_m: kgm, unite_nomen: unite, status: 'invalid', include: false, reason: 'doublon dans le fichier' };
+      return { code, famille, matiere, section, kg_m: kgm, unite_nomen: unite, status: 'invalid', include: false, reason: 'doublon dans le fichier' };
     }
     if (existing) {
-      return { famille, matiere, section, kg_m: kgm, unite_nomen: unite, status: 'match', matchId: existing.id, include: true };
+      return { code, famille, matiere, section, kg_m: kgm, unite_nomen: unite, status: 'match', matchId: existing.id, include: true };
     }
-    return { famille, matiere, section, kg_m: kgm, unite_nomen: unite, status: 'new', include: true };
+    return { code, famille, matiere, section, kg_m: kgm, unite_nomen: unite, status: 'new', include: true };
   });
 
   produitsImportData.reviewRows = reviewRows;
@@ -2165,6 +2190,7 @@ function renderProduitsReview() {
       <tr style="${r.status === 'invalid' ? 'opacity:.5' : ''}">
         <td><input type="checkbox" ${r.include ? 'checked' : ''} ${r.status === 'invalid' ? 'disabled' : ''} onchange="produitsImportData.reviewRows[${i}].include=this.checked"></td>
         <td><span class="dot ${dot}"></span> ${label}</td>
+        <td class="mono">${esc(r.code) || '—'}</td>
         <td>${esc(r.famille) || '—'}</td>
         <td>${esc(r.matiere) || '—'}</td>
         <td class="bold">${esc(r.section) || '—'}</td>
@@ -2204,7 +2230,7 @@ function confirmImportProduits() {
     if (r.status === 'new') {
       const maxId = db.articles.reduce((m, a) => Math.max(m, a.id), 0);
       db.articles.push({
-        id: maxId + 1,
+        id: maxId + 1, code: r.code || null,
         famille: r.famille, matiere: r.matiere || 'INOX 304', section: r.section,
         kg_m: r.kg_m, unite_nomen: r.unite_nomen || 'M',
         unite_fourn: null, coef_conv: null, prix_fourn: null,
@@ -2215,6 +2241,7 @@ function confirmImportProduits() {
       const a = db.articles.find(x => x.id === r.matchId);
       if (!a) return;
       // Ne complète que les champs fournis par le fichier — ne blanchit jamais une valeur existante.
+      if (r.code) a.code = r.code;
       if (r.kg_m !== null) a.kg_m = r.kg_m;
       if (r.unite_nomen) a.unite_nomen = r.unite_nomen;
       updated++;
@@ -2267,7 +2294,7 @@ function renderCorrespondances() {
 function openAddCorrespondance(prefixDesig = '', prefixFourn = '', prefixArtId = null) {
   const arts = db.articles;
   const artOptions = arts.map(a =>
-    `<option value="${a.id}" ${a.id === prefixArtId ? 'selected' : ''}>${esc(a.famille)} — ${esc(a.section)} (${esc(a.matiere)})</option>`
+    `<option value="${a.id}" ${a.id === prefixArtId ? 'selected' : ''}>${a.code ? '[' + esc(a.code) + '] ' : ''}${esc(a.famille)} — ${esc(a.section)} (${esc(a.matiere)})</option>`
   ).join('');
 
   openModal(`
@@ -2313,26 +2340,30 @@ function openAddArticleFromCorresp() {
     <p class="muted" style="font-size:12px;margin:-8px 0 12px">L'article créé sera automatiquement sélectionné dans la correspondance.</p>
     <div class="form-row">
       <div class="form-group">
+        <label>Code</label>
+        <input type="text" id="m-code" placeholder="ex: TR-INOX-30401">
+      </div>
+      <div class="form-group">
         <label>Famille</label>
         <input type="text" id="m-famille" list="familles-list2" placeholder="TUBE CARRE">
         <datalist id="familles-list2">${familles.map(f=>`<option value="${esc(f)}">`).join('')}</datalist>
       </div>
+    </div>
+    <div class="form-row">
       <div class="form-group">
         <label>Matière</label>
         <input type="text" id="m-matiere" placeholder="INOX 304">
       </div>
-    </div>
-    <div class="form-row">
       <div class="form-group">
         <label>Dimension caractéristique</label>
         <input type="text" id="m-section" placeholder="50X50X2">
       </div>
+    </div>
+    <div class="form-row">
       <div class="form-group">
         <label>KG/M</label>
         <input type="number" id="m-kgm" step="0.01" min="0">
       </div>
-    </div>
-    <div class="form-row">
       <div class="form-group">
         <label>Unité nomenclature</label>
         <select id="m-unite">
@@ -2340,10 +2371,10 @@ function openAddArticleFromCorresp() {
           <option value="U">U</option><option value="KG">KG</option>
         </select>
       </div>
-      <div class="form-group">
-        <label>Prix nomenclature</label>
-        <input type="number" id="m-prix" step="0.01" min="0">
-      </div>
+    </div>
+    <div class="form-group">
+      <label>Prix nomenclature</label>
+      <input type="number" id="m-prix" step="0.01" min="0">
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="openAddCorrespondance(_correspReturnState?.desig||'',_correspReturnState?.fourn||'',_correspReturnState?.artId||null)">← Retour</button>
@@ -2353,6 +2384,7 @@ function openAddArticleFromCorresp() {
 }
 
 function addNewArticleFromCorresp() {
+  const code = document.getElementById('m-code').value.trim();
   const famille = document.getElementById('m-famille').value.trim();
   const matiere = document.getElementById('m-matiere').value.trim();
   const section = document.getElementById('m-section').value.trim();
@@ -2362,7 +2394,7 @@ function addNewArticleFromCorresp() {
   const unite = document.getElementById('m-unite').value;
   const maxId = db.articles.reduce((m, a) => Math.max(m, a.id), 0);
   const newArt = {
-    id: maxId + 1, famille, matiere: matiere || 'INOX 304', section,
+    id: maxId + 1, code: code || null, famille, matiere: matiere || 'INOX 304', section,
     kg_m: isNaN(kgm) ? null : kgm,
     unite_nomen: unite, unite_fourn: null, coef_conv: null, prix_fourn: null,
     dernier_fourn: null, derniere_facture: null, derniere_date: null, notes: ''
@@ -2724,11 +2756,11 @@ function deleteAllData() {
 // ============================================================
 function exportCSV() {
   const articles = getFilteredArticles();
-  const headers = ['Famille','Matière','Dimension caractéristique','Unité Nomen.','Prix calc. (€/unité)','Unité Fourn.','Coef Conv.','Prix Fourn. (€)','Dernier Fournisseur','Dernière Facture','Date MAJ'];
+  const headers = ['Code','Famille','Matière','Dimension caractéristique','Unité Nomen.','Prix calc. (€/unité)','Unité Fourn.','Coef Conv.','Prix Fourn. (€)','Dernier Fournisseur','Dernière Facture','Date MAJ'];
   const rows = articles.map(a => {
     const prixCalc = (a.prix_fourn !== null && a.coef_conv !== null) ? (a.prix_fourn * a.coef_conv).toFixed(4) : '';
     return [
-      a.famille, a.matiere, a.section, a.unite_nomen,
+      a.code ?? '', a.famille, a.matiere, a.section, a.unite_nomen,
       prixCalc.replace('.', ','),
       a.unite_fourn ?? '',
       a.coef_conv?.toString().replace('.', ',') ?? '',
@@ -2748,7 +2780,7 @@ function exportXLSX() {
 
   // En-têtes
   const headers = [
-    'Famille', 'Matière', 'Dimension caractéristique',
+    'Code', 'Famille', 'Matière', 'Dimension caractéristique',
     'Unité nomenclature',
     'Prix unitaire (€/unité nomen.)',
     'Dernier fournisseur', 'Dernière facture', 'Date MAJ'
@@ -2760,6 +2792,7 @@ function exportXLSX() {
       ? parseFloat((a.prix_fourn * a.coef_conv).toFixed(4))
       : null;
     return [
+      a.code ?? '',
       a.famille ?? '',
       a.matiere ?? '',
       a.section ?? '',
