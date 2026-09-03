@@ -1,33 +1,12 @@
-version: '3.8'
-
 services:
   techinox-gestion:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: techinox-gestion
     expose:
-      - "3210"          # exposé au réseau docker interne seulement — jamais publié directement
+      - "3210"          # Coolify (ou votre reverse-proxy) route vers ce port en interne
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     volumes:
       - ./data:/app/data   # db.json, users.json, pdfs/ — persistant, jamais écrasé par une image rebuild
     restart: always
-
-  caddy:
-    image: caddy:2-alpine
-    container_name: tig-caddy
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data
-      - caddy-config:/config
-    depends_on:
-      - techinox-gestion
-    restart: always
-
-volumes:
-  caddy-data:
-  caddy-config:
