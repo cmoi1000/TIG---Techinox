@@ -99,6 +99,13 @@ tr:hover td{background:#fafbff}
 .upload-zone .uz-icon{font-size:48px;margin-bottom:12px;opacity:.5}
 .upload-zone p{color:var(--text2);margin:4px 0}
 .upload-zone small{color:var(--text3)}
+/* Import facture — cartes compactes pour remonter la revue des lignes */
+#import-upload-card,#import-info,#import-status-card{padding:12px 16px;margin-bottom:10px}
+#import-upload-card .card-title,#import-info .card-title,#import-status-card .card-title{margin-bottom:8px;font-size:14px}
+#upload-zone{padding:16px 20px}
+#upload-zone .uz-icon{font-size:26px;margin-bottom:4px}
+#upload-zone p{margin:2px 0;font-size:13px}
+#upload-zone small{font-size:11px}
 /* EDITABLE CELLS */
 .editable-val{cursor:pointer;color:var(--primary);border-bottom:1px dashed var(--primary);padding:1px 4px;border-radius:2px}
 .editable-val:hover{background:var(--primary-light)}
@@ -434,7 +441,7 @@ th.has-filter .sort-icon{color:var(--primary);opacity:1}
 <div id="panel-import" class="panel">
   <div class="split-2" style="align-items:start">
     <div>
-      <div class="card">
+      <div class="card" id="import-upload-card">
         <div class="card-title">📤 Importer une facture fournisseur</div>
         <div id="upload-zone" class="upload-zone" onclick="document.getElementById('file-input').click()"
           ondragover="event.preventDefault();this.classList.add('drag-over')"
@@ -1898,6 +1905,20 @@ function artComboSearch(comboId, query) {
     : `<div class="art-combo-item muted">Aucun résultat</div>`
   ) + `<div class="art-combo-item muted" style="border-top:1px solid var(--border)" onmousedown="artComboSelect('${comboId}','')">— Non assigné —</div>`;
   list.style.display = '';
+
+  // Ouvre vers le haut s'il n'y a pas assez de place en dessous (ex: dernière ligne
+  // d'un tableau) — sinon la liste part sous la ligne de flottaison, invisible sans scroll.
+  const input = document.getElementById(`combo-${comboId}-input`);
+  if (input) {
+    const rect = input.getBoundingClientRect();
+    const listHeight = Math.min(220, list.scrollHeight || 220);
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const openUp = spaceBelow < listHeight && rect.top > listHeight;
+    list.style.top = openUp ? 'auto' : '100%';
+    list.style.bottom = openUp ? '100%' : 'auto';
+    list.style.marginTop = openUp ? '0' : '2px';
+    list.style.marginBottom = openUp ? '2px' : '0';
+  }
 }
 
 function artComboClose(comboId) {
