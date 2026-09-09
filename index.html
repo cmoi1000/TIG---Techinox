@@ -392,21 +392,12 @@ th.has-filter .sort-icon{color:var(--primary);opacity:1}
           <th><select id="cf-famille" class="col-filter" onchange="renderTarifs()"><option value="">Toutes</option></select></th>
           <th><select id="cf-matiere" class="col-filter" onchange="renderTarifs()"><option value="">Toutes</option></select></th>
           <th><input id="cf-section" class="col-filter" type="text" placeholder="Filtrer dimension..." oninput="renderTarifs()"></th>
-          <th><select id="cf-unite-nomen" class="col-filter" onchange="renderTarifs()">
-            <option value="">Toutes</option>
-            <option value="M">M</option><option value="M2">M2</option>
-            <option value="U">U</option><option value="KG">KG</option>
-          </select></th>
+          <th><select id="cf-unite-nomen" class="col-filter" onchange="renderTarifs()"><option value="">Toutes</option></select></th>
           <th><div class="col-filter-range">
             <input id="cf-prix-min" class="col-filter" type="number" placeholder="≥" min="0" step="0.01" oninput="renderTarifs()" title="Prix minimum">
             <input id="cf-prix-max" class="col-filter" type="number" placeholder="≤" min="0" step="0.01" oninput="renderTarifs()" title="Prix maximum">
           </div></th>
-          <th><select id="cf-unite-fourn" class="col-filter" onchange="renderTarifs()">
-            <option value="">Toutes</option>
-            <option value="ML">ML</option><option value="KG">KG</option>
-            <option value="BA">BA</option><option value="FE">FE</option>
-            <option value="M2">M2</option><option value="U">U</option>
-          </select></th>
+          <th><select id="cf-unite-fourn" class="col-filter" onchange="renderTarifs()"><option value="">Toutes</option></select></th>
           <th><select id="cf-coef" class="col-filter" onchange="renderTarifs()">
             <option value="">Tous</option>
             <option value="no">Sans coef</option>
@@ -692,12 +683,7 @@ th.has-filter .sort-icon{color:var(--primary);opacity:1}
           <th><input id="hcf-section" class="col-filter" type="text" placeholder="Dimension..." oninput="renderHistorique()"></th>
           <th><input id="hcf-desig" class="col-filter" type="text" placeholder="Désignation..." oninput="renderHistorique()"></th>
           <th></th>
-          <th><select id="hcf-unite" class="col-filter" onchange="renderHistorique()">
-            <option value="">Toutes</option>
-            <option value="ML">ML</option><option value="KG">KG</option>
-            <option value="BA">BA</option><option value="FE">FE</option>
-            <option value="M2">M2</option><option value="U">U</option>
-          </select></th>
+          <th><select id="hcf-unite" class="col-filter" onchange="renderHistorique()"><option value="">Toutes</option></select></th>
           <th><div class="col-filter-range">
             <input id="hcf-px-min" class="col-filter" type="number" placeholder="≥" min="0" step="0.01" oninput="renderHistorique()">
             <input id="hcf-px-max" class="col-filter" type="number" placeholder="≤" min="0" step="0.01" oninput="renderHistorique()">
@@ -735,18 +721,50 @@ th.has-filter .sort-icon{color:var(--primary);opacity:1}
         <button class="btn btn-primary" onclick="saveClaudeModel()">💾 Enregistrer</button>
       </div>
 
-      <div class="card admin-only" id="card-matieres">
-        <div class="card-title">🧪 Matières <span class="badge badge-blue" style="font-size:11px">Admin</span></div>
-        <p class="muted" style="font-size:12px;margin-bottom:12px">Liste fermée — les matières ne peuvent plus être créées à la volée dans les formulaires d'article, seulement choisies ici.</p>
-        <div id="matieres-list" style="margin-bottom:14px"></div>
-        <hr class="sep">
+      <div class="card admin-only" id="card-listes">
+        <div class="card-title">📋 Listes configurables <span class="badge badge-blue" style="font-size:11px">Admin</span></div>
+        <p class="muted" style="font-size:12px;margin-bottom:14px">Listes fermées — ces valeurs ne peuvent plus être créées à la volée dans les formulaires d'article ou les imports, seulement choisies ici puis proposées en menu déroulant.</p>
+
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px">🧪 Matières</div>
+        <div id="matieres-list" style="margin-bottom:10px"></div>
         <div class="form-row">
           <div class="form-group">
-            <label>Nouvelle matière</label>
-            <input type="text" id="nm-matiere" placeholder="ex: INOX 430" onkeydown="if(event.key==='Enter'){event.preventDefault();addMatiere();}">
+            <input type="text" id="nm-matiere" placeholder="ex: INOX 430" onkeydown="if(event.key==='Enter'){event.preventDefault();addToManagedList('matieres');}">
           </div>
+          <button class="btn btn-primary btn-sm" onclick="addToManagedList('matieres')" style="align-self:start">➕ Ajouter</button>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="addMatiere()">➕ Ajouter</button>
+        <hr class="sep">
+
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px">📦 Familles</div>
+        <div id="familles-list-cfg" style="margin-bottom:10px"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <input type="text" id="nm-famille-cfg" placeholder="ex: DDAL BAR" onkeydown="if(event.key==='Enter'){event.preventDefault();addToManagedList('familles');}">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="addToManagedList('familles')" style="align-self:start">➕ Ajouter</button>
+        </div>
+        <hr class="sep">
+
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px">📐 Unités nomenclature</div>
+        <p class="muted" style="font-size:11.5px;margin-bottom:8px">Unité interne de facturation/stock d'un article (mètre, m², pièce...).</p>
+        <div id="unomen-list" style="margin-bottom:10px"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <input type="text" id="nm-unomen" placeholder="ex: PC" onkeydown="if(event.key==='Enter'){event.preventDefault();addToManagedList('unites_nomen');}">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="addToManagedList('unites_nomen')" style="align-self:start">➕ Ajouter</button>
+        </div>
+        <hr class="sep">
+
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px">🚚 Unités fournisseur</div>
+        <p class="muted" style="font-size:11.5px;margin-bottom:8px">Unité utilisée par le fournisseur sur ses factures (mètre linéaire, barre, feuille...).</p>
+        <div id="ufourn-list" style="margin-bottom:10px"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <input type="text" id="nm-ufourn" placeholder="ex: PC" onkeydown="if(event.key==='Enter'){event.preventDefault();addToManagedList('unites_fourn');}">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="addToManagedList('unites_fourn')" style="align-self:start">➕ Ajouter</button>
+        </div>
       </div>
     </div>
 
@@ -911,7 +929,15 @@ function applySession() {
 // DATABASE — serveur partagé (/api/db)
 // ============================================================
 
-const DEFAULT_MATIERES = ['INOX 304', 'INOX 304L', 'INOX 316L'];
+// Listes configurables (Paramètres) — plus aucune valeur de matière/famille/unité
+// n'est codée en dur dans les formulaires : tout vient de db.<clé>, éditable en interface.
+const DEFAULT_LISTS = {
+  matieres:     ['INOX 304', 'INOX 304L', 'INOX 316L'],
+  familles:     ['TUBE ROND', 'TUBE CARRE', 'TUBE RECT', 'CORNIERE', 'PLAT', 'ROND', 'CARRE', 'TOLE'],
+  unites_nomen: ['M', 'M2', 'U', 'KG'],
+  unites_fourn: ['ML', 'KG', 'BA', 'FE', 'M2', 'U']
+};
+const LIST_SOURCE_FIELD = { matieres: 'matiere', familles: 'famille', unites_nomen: 'unite_nomen', unites_fourn: 'unite_fourn' };
 
 let db = freshDB();
 
@@ -919,7 +945,10 @@ function freshDB() {
   return {
     settings: { model: 'claude-opus-5', supplier: 'BELMET' },
     articles: JSON.parse(JSON.stringify(INITIAL_ARTICLES)),
-    matieres: DEFAULT_MATIERES.slice(),
+    matieres: DEFAULT_LISTS.matieres.slice(),
+    familles: DEFAULT_LISTS.familles.slice(),
+    unites_nomen: DEFAULT_LISTS.unites_nomen.slice(),
+    unites_fourn: DEFAULT_LISTS.unites_fourn.slice(),
     correspondances: [],
     factures: [],
     lignes: [],
@@ -950,12 +979,15 @@ async function loadDB() {
   // Migration sécurité : la clé API Claude ne doit plus jamais vivre côté client —
   // purge toute trace résiduelle d'une ancienne version (db.json, localStorage).
   if (db.settings && 'apiKey' in db.settings) delete db.settings.apiKey;
-  // Migration : liste de matières gérée — seedée avec les valeurs déjà utilisées
-  // par le catalogue existant, pour ne rien perdre en passant du texte libre au menu.
-  if (!Array.isArray(db.matieres)) {
-    const existing = uniq(db.articles.map(a => a.matiere).filter(Boolean));
-    db.matieres = uniq([...DEFAULT_MATIERES, ...existing]);
-  }
+  // Migration : listes configurables (matières, familles, unités) — seedées avec les
+  // valeurs déjà utilisées par le catalogue existant, rien n'est perdu en passant du
+  // texte libre / des listes figées à des menus déroulants gérés dans Paramètres.
+  Object.keys(DEFAULT_LISTS).forEach(name => {
+    if (!Array.isArray(db[name])) {
+      const existing = uniq(db.articles.map(a => a[LIST_SOURCE_FIELD[name]]).filter(Boolean));
+      db[name] = uniq([...DEFAULT_LISTS[name], ...existing]);
+    }
+  });
   try {
     localStorage.removeItem('gestTarifs_v2');
     localStorage.removeItem('tig_v2');
@@ -1200,6 +1232,20 @@ function populateFilterDropdowns() {
   if (hcfFam) { const cur=hcfFam.value; hcfFam.innerHTML=`<option value="">Toutes</option>`+familles.map(f=>`<option value="${esc(f)}" ${f===cur?'selected':''}>${esc(f)}</option>`).join(''); }
   const hcfMat = document.getElementById('hcf-matiere');
   if (hcfMat) { const cur=hcfMat.value; const matsLignes=uniq(db.lignes.map(l=>l.matiere).filter(Boolean)).sort(); hcfMat.innerHTML=`<option value="">Toutes</option>`+matsLignes.map(m=>`<option value="${esc(m)}" ${m===cur?'selected':''}>${esc(m)}</option>`).join(''); }
+
+  // Colonnes unité nomenclature / unité fournisseur — options limitées à ce qui est
+  // réellement utilisé dans les données (pas toute la liste configurée en Paramètres).
+  const uNomenUsed = uniq(db.articles.map(a => a.unite_nomen).filter(Boolean)).sort();
+  const cfUNomen = document.getElementById('cf-unite-nomen');
+  if (cfUNomen) { const cur=cfUNomen.value; cfUNomen.innerHTML=`<option value="">Toutes</option>`+uNomenUsed.map(u=>`<option value="${esc(u)}" ${u===cur?'selected':''}>${esc(u)}</option>`).join(''); }
+
+  const uFournUsed = uniq(db.articles.map(a => a.unite_fourn).filter(Boolean)).sort();
+  const cfUFourn = document.getElementById('cf-unite-fourn');
+  if (cfUFourn) { const cur=cfUFourn.value; cfUFourn.innerHTML=`<option value="">Toutes</option>`+uFournUsed.map(u=>`<option value="${esc(u)}" ${u===cur?'selected':''}>${esc(u)}</option>`).join(''); }
+
+  const uFournLignes = uniq(db.lignes.map(l => l.unite).filter(Boolean)).sort();
+  const hcfUnite = document.getElementById('hcf-unite');
+  if (hcfUnite) { const cur=hcfUnite.value; hcfUnite.innerHTML=`<option value="">Toutes</option>`+uFournLignes.map(u=>`<option value="${esc(u)}" ${u===cur?'selected':''}>${esc(u)}</option>`).join(''); }
 }
 
 function renderTarifs() {
@@ -1312,9 +1358,7 @@ function editCoef(id) {
     <div class="form-row">
       <div class="form-group">
         <label>Unité fournisseur</label>
-        <select id="m-unite-fourn">
-          ${['ML','KG','BA','FE','M2','U'].map(u => `<option value="${u}" ${a.unite_fourn===u?'selected':''}>${u}</option>`).join('')}
-        </select>
+        <select id="m-unite-fourn">${optionsFromList('unites_fourn', a.unite_fourn)}</select>
       </div>
       <div class="form-group">
         <label>Coefficient (unité fourn. / unité nomen.)</label>
@@ -1355,7 +1399,6 @@ function saveCoef(id) {
 function editArticle(id) {
   const a = db.articles.find(x => x.id === id);
   if (!a) return;
-  const familles = uniq(db.articles.map(x => x.famille)).sort();
   openModal(`
     <div class="modal-title">Modifier l'article — ${esc(a.famille)} ${esc(a.section)}</div>
     <div class="form-row">
@@ -1365,14 +1408,13 @@ function editArticle(id) {
       </div>
       <div class="form-group">
         <label>Famille</label>
-        <input type="text" id="m-famille" value="${esc(a.famille)}" list="familles-list">
-        <datalist id="familles-list">${familles.map(f=>`<option value="${esc(f)}">`).join('')}</datalist>
+        <select id="m-famille">${optionsFromList('familles', a.famille)}</select>
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
         <label>Matière</label>
-        <select id="m-matiere">${matiereOptions(a.matiere)}</select>
+        <select id="m-matiere">${optionsFromList('matieres', a.matiere)}</select>
       </div>
       <div class="form-group">
         <label>Dimension caractéristique / Désignation</label>
@@ -1381,16 +1423,15 @@ function editArticle(id) {
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>KG/M (ou KG/M²)</label>
-        <input type="number" id="m-kgm" value="${a.kg_m ?? ''}" step="0.01" min="0">
+        <label>Poids théorique (kg/m ou kg/m²)</label>
+        <input type="number" id="m-kgm" value="${a.kg_m ?? ''}" step="0.01" min="0" placeholder="ex: 1,38">
       </div>
       <div class="form-group">
         <label>Unité nomenclature</label>
-        <select id="m-unite">
-          ${['M','M2','U','KG'].map(u=>`<option value="${u}" ${a.unite_nomen===u?'selected':''}>${u}</option>`).join('')}
-        </select>
+        <select id="m-unite">${optionsFromList('unites_nomen', a.unite_nomen)}</select>
       </div>
     </div>
+    <p class="form-hint" style="margin-top:-10px">Le poids théorique est un repère pour calculer le coefficient de conversion plus tard (via « Saisir » dans le tableau) — il n'affecte pas directement le prix affiché.</p>
     <div class="form-group">
       <label>Prix calculé (lecture seule)</label>
       <input type="text" disabled value="${a.prix_fourn !== null && a.coef_conv !== null ? fmt(a.prix_fourn * a.coef_conv) + ' €/' + a.unite_nomen : '— (coef non saisi)'}" style="background:#f5f5f5;color:#888">
@@ -1419,7 +1460,6 @@ function saveArticle(id) {
 }
 
 function openAddArticle() {
-  const familles = uniq(db.articles.map(x => x.famille)).sort();
   openModal(`
     <div class="modal-title">Ajouter un article</div>
     <div class="form-row">
@@ -1429,14 +1469,13 @@ function openAddArticle() {
       </div>
       <div class="form-group">
         <label>Famille</label>
-        <input type="text" id="m-famille" list="familles-list" placeholder="TUBE CARRE">
-        <datalist id="familles-list">${familles.map(f=>`<option value="${esc(f)}">`).join('')}</datalist>
+        <select id="m-famille">${optionsFromList('familles', null, '— Sélectionner —')}</select>
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
         <label>Matière</label>
-        <select id="m-matiere">${matiereOptions(null)}</select>
+        <select id="m-matiere">${optionsFromList('matieres', null)}</select>
       </div>
       <div class="form-group">
         <label>Dimension caractéristique</label>
@@ -1445,17 +1484,15 @@ function openAddArticle() {
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>KG/M</label>
-        <input type="number" id="m-kgm" step="0.01" min="0">
+        <label>Poids théorique (kg/m ou kg/m²)</label>
+        <input type="number" id="m-kgm" step="0.01" min="0" placeholder="ex: 1,38">
       </div>
       <div class="form-group">
         <label>Unité nomenclature</label>
-        <select id="m-unite">
-          <option value="M">M</option><option value="M2">M2</option>
-          <option value="U">U</option><option value="KG">KG</option>
-        </select>
+        <select id="m-unite">${optionsFromList('unites_nomen', null)}</select>
       </div>
     </div>
+    <p class="form-hint" style="margin-top:-10px">Le poids théorique est un repère pour calculer le coefficient de conversion plus tard (via « Saisir » dans le tableau) — il n'affecte pas directement le prix affiché.</p>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
       <button class="btn btn-primary" onclick="addNewArticle()">➕ Ajouter</button>
@@ -1465,15 +1502,21 @@ function openAddArticle() {
 
 function addNewArticle() {
   const code = document.getElementById('m-code').value.trim();
-  const famille = document.getElementById('m-famille').value.trim();
-  const matiere = document.getElementById('m-matiere').value.trim();
+  const famille = document.getElementById('m-famille').value;
+  const matiere = document.getElementById('m-matiere').value;
   const section = document.getElementById('m-section').value.trim();
-  if (!famille || !section) { toast('Famille et section obligatoires', 'err'); return; }
+  if (!famille && !section) {
+    toast('Famille et dimension caractéristique obligatoires', 'err');
+    document.getElementById('m-famille').focus();
+    return;
+  }
+  if (!famille) { toast('Famille obligatoire', 'err'); document.getElementById('m-famille').focus(); return; }
+  if (!section) { toast('Dimension caractéristique obligatoire', 'err'); document.getElementById('m-section').focus(); return; }
   const kgm = parseFloat(document.getElementById('m-kgm').value);
   const unite = document.getElementById('m-unite').value;
   const maxId = db.articles.reduce((m, a) => Math.max(m, a.id), 0);
   db.articles.push({
-    id: maxId + 1, code: code || null, famille, matiere: matiere || 'INOX 304', section,
+    id: maxId + 1, code: code || null, famille, matiere, section,
     kg_m: isNaN(kgm) ? null : kgm,
     unite_nomen: unite, unite_fourn: null, coef_conv: null, prix_fourn: null,
     dernier_fourn: null, derniere_facture: null, derniere_date: null, notes: ''
@@ -1877,15 +1920,11 @@ function artComboSelect(comboId, articleIdRaw) {
 }
 
 // ── RENDER IMPORT REVIEW ─────────────────────────────────────
-const UNITE_FOURN_OPTIONS = ['ML', 'KG', 'BA', 'FE', 'M2', 'U'];
-
 // Menu déroulant d'unité fournisseur pour une ligne de facture — pré-rempli avec
 // le choix de Claude, modifiable avant confirmation de l'import.
 function uniteSelect(currentUnite, idx) {
-  const opts = UNITE_FOURN_OPTIONS.slice();
-  if (currentUnite && !opts.includes(currentUnite)) opts.push(currentUnite); // valeur inattendue de l'extraction — on ne la perd pas silencieusement
   return `<select class="unite-select" onchange="updateLigneUnite(${idx},this.value)" style="font-size:12px;padding:3px 6px;border:1px solid var(--border);border-radius:4px" title="Unité extraite par Claude — modifiable">
-    ${opts.map(u => `<option value="${u}" ${u === currentUnite ? 'selected' : ''}>${u}</option>`).join('')}
+    ${optionsFromList('unites_fourn', currentUnite)}
   </select>`;
 }
 
@@ -2263,7 +2302,7 @@ function analyzeProduitsImport() {
     const kgmRaw  = colKgm !== '' ? r[colKgm] : '';
     const kgm     = kgmRaw !== '' && !isNaN(parseFloat(kgmRaw)) ? parseFloat(kgmRaw) : null;
     let unite     = colUnite !== '' ? String(r[colUnite] ?? '').trim().toUpperCase() : '';
-    if (!['M', 'M2', 'U', 'KG'].includes(unite)) unite = '';
+    if (!(db.unites_nomen || []).includes(unite)) unite = '';
 
     if (!famille || !section) {
       return { code, famille, matiere, section, kg_m: kgm, unite_nomen: unite, status: 'invalid', include: false };
@@ -2450,7 +2489,6 @@ function openAddArticleFromCorresp() {
     artId: parseInt(document.getElementById('c-article')?.value) || null,
     notes: document.getElementById('c-notes')?.value || ''
   };
-  const familles = uniq(db.articles.map(x => x.famille)).sort();
   openModal(`
     <div class="modal-title">Ajouter un article</div>
     <p class="muted" style="font-size:12px;margin:-8px 0 12px">L'article créé sera automatiquement sélectionné dans la correspondance.</p>
@@ -2461,14 +2499,13 @@ function openAddArticleFromCorresp() {
       </div>
       <div class="form-group">
         <label>Famille</label>
-        <input type="text" id="m-famille" list="familles-list2" placeholder="TUBE CARRE">
-        <datalist id="familles-list2">${familles.map(f=>`<option value="${esc(f)}">`).join('')}</datalist>
+        <select id="m-famille">${optionsFromList('familles', null, '— Sélectionner —')}</select>
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
         <label>Matière</label>
-        <select id="m-matiere">${matiereOptions(null)}</select>
+        <select id="m-matiere">${optionsFromList('matieres', null)}</select>
       </div>
       <div class="form-group">
         <label>Dimension caractéristique</label>
@@ -2477,15 +2514,12 @@ function openAddArticleFromCorresp() {
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>KG/M</label>
-        <input type="number" id="m-kgm" step="0.01" min="0">
+        <label>Poids théorique (kg/m ou kg/m²)</label>
+        <input type="number" id="m-kgm" step="0.01" min="0" placeholder="ex: 1,38">
       </div>
       <div class="form-group">
         <label>Unité nomenclature</label>
-        <select id="m-unite">
-          <option value="M">M</option><option value="M2">M2</option>
-          <option value="U">U</option><option value="KG">KG</option>
-        </select>
+        <select id="m-unite">${optionsFromList('unites_nomen', null)}</select>
       </div>
     </div>
     <div class="form-group">
@@ -2501,16 +2535,22 @@ function openAddArticleFromCorresp() {
 
 function addNewArticleFromCorresp() {
   const code = document.getElementById('m-code').value.trim();
-  const famille = document.getElementById('m-famille').value.trim();
-  const matiere = document.getElementById('m-matiere').value.trim();
+  const famille = document.getElementById('m-famille').value;
+  const matiere = document.getElementById('m-matiere').value;
   const section = document.getElementById('m-section').value.trim();
-  if (!famille || !section) { toast('Famille et section obligatoires', 'err'); return; }
+  if (!famille && !section) {
+    toast('Famille et dimension caractéristique obligatoires', 'err');
+    document.getElementById('m-famille').focus();
+    return;
+  }
+  if (!famille) { toast('Famille obligatoire', 'err'); document.getElementById('m-famille').focus(); return; }
+  if (!section) { toast('Dimension caractéristique obligatoire', 'err'); document.getElementById('m-section').focus(); return; }
   const kgm = parseFloat(document.getElementById('m-kgm').value);
   const prix = parseFloat(document.getElementById('m-prix').value);
   const unite = document.getElementById('m-unite').value;
   const maxId = db.articles.reduce((m, a) => Math.max(m, a.id), 0);
   const newArt = {
-    id: maxId + 1, code: code || null, famille, matiere: matiere || 'INOX 304', section,
+    id: maxId + 1, code: code || null, famille, matiere, section,
     kg_m: isNaN(kgm) ? null : kgm,
     unite_nomen: unite, unite_fourn: null, coef_conv: null, prix_fourn: null,
     dernier_fourn: null, derniere_facture: null, derniere_date: null, notes: ''
@@ -2663,7 +2703,7 @@ function renderHistorique() {
 // ============================================================
 function renderSettings() {
   if (currentUser?.role === 'admin') renderUsers();
-  renderMatieres();
+  renderAllManagedLists();
   const statusEl = document.getElementById('claude-status-text');
   if (statusEl) {
     statusEl.textContent = claudeConfigured === true ? '✅ Clé API configurée sur le serveur'
@@ -2685,61 +2725,79 @@ function saveClaudeModel() {
 }
 
 // ============================================================
-// MATIÈRES — liste fermée, gérée ici, choisie par menu déroulant
-// partout ailleurs (jamais de saisie libre dans les formulaires d'article).
+// LISTES CONFIGURABLES — matières, familles, unités nomenclature/fournisseur.
+// Liste fermée gérée ici (Paramètres), choisie par menu déroulant partout
+// ailleurs : plus aucune valeur créée à la volée dans les formulaires.
 // ============================================================
-function renderMatieres() {
-  const el = document.getElementById('matieres-list');
+const MANAGED_LISTS = {
+  matieres:     { label: 'matière',            listEl: 'matieres-list', inputEl: 'nm-matiere', field: 'matiere' },
+  familles:     { label: 'famille',            listEl: 'familles-list-cfg', inputEl: 'nm-famille-cfg', field: 'famille' },
+  unites_nomen: { label: 'unité nomenclature', listEl: 'unomen-list',   inputEl: 'nm-unomen',  field: 'unite_nomen' },
+  unites_fourn: { label: 'unité fournisseur',  listEl: 'ufourn-list',   inputEl: 'nm-ufourn',  field: 'unite_fourn' }
+};
+
+function renderManagedList(name) {
+  const cfg = MANAGED_LISTS[name];
+  const el = document.getElementById(cfg.listEl);
   if (!el) return;
-  const list = db.matieres || [];
-  el.innerHTML = list.length ? list.map((mt, i) => {
-    const inUse = db.articles.some(a => a.matiere === mt);
+  const list = db[name] || [];
+  el.innerHTML = list.length ? list.map((val, i) => {
+    const inUse = db.articles.some(a => a[cfg.field] === val);
     return `
       <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
-        <span style="flex:1;font-size:13px">${esc(mt)}</span>
+        <span style="flex:1;font-size:13px">${esc(val)}</span>
         ${inUse ? `<span class="badge badge-grey" style="font-size:10px">utilisée</span>` : ''}
-        <button class="btn btn-xs" style="background:#ffebee;color:#c62828" onclick="deleteMatiere(${i})" title="Supprimer">🗑</button>
+        <button class="btn btn-xs" style="background:#ffebee;color:#c62828" onclick="deleteFromManagedList('${name}',${i})" title="Supprimer">🗑</button>
       </div>`;
-  }).join('') : '<p class="muted" style="font-size:12px">Aucune matière — ajoutez-en au moins une.</p>';
+  }).join('') : `<p class="muted" style="font-size:12px">Aucune ${cfg.label} — ajoutez-en au moins une.</p>`;
 }
 
-function addMatiere() {
-  const inp = document.getElementById('nm-matiere');
+function renderAllManagedLists() {
+  Object.keys(MANAGED_LISTS).forEach(renderManagedList);
+}
+
+function addToManagedList(name) {
+  const cfg = MANAGED_LISTS[name];
+  const inp = document.getElementById(cfg.inputEl);
   const val = inp.value.trim();
-  if (!val) { toast('Nom de matière requis', 'err'); return; }
-  db.matieres = db.matieres || [];
-  if (db.matieres.some(m => m.toLowerCase() === val.toLowerCase())) {
-    toast('Cette matière existe déjà', 'err'); return;
+  if (!val) { toast(`Valeur requise`, 'err'); return; }
+  db[name] = db[name] || [];
+  if (db[name].some(v => v.toLowerCase() === val.toLowerCase())) {
+    toast('Cette valeur existe déjà', 'err'); return;
   }
-  db.matieres.push(val);
+  db[name].push(val);
   saveDB();
   inp.value = '';
-  renderMatieres();
-  toast('Matière ajoutée', 'ok');
+  renderManagedList(name);
+  toast(`${cfg.label.charAt(0).toUpperCase() + cfg.label.slice(1)} ajoutée`, 'ok');
 }
 
-function deleteMatiere(idx) {
-  const mt = db.matieres[idx];
-  if (!mt) return;
-  if (db.matieres.length <= 1) { toast('Il doit rester au moins une matière dans la liste', 'err'); return; }
-  const inUse = db.articles.filter(a => a.matiere === mt).length;
+function deleteFromManagedList(name, idx) {
+  const cfg = MANAGED_LISTS[name];
+  const val = db[name][idx];
+  if (!val) return;
+  if (db[name].length <= 1) { toast(`Il doit rester au moins une ${cfg.label} dans la liste`, 'err'); return; }
+  const inUse = db.articles.filter(a => a[cfg.field] === val).length;
   const msg = inUse
-    ? `Supprimer "${mt}" de la liste ? ${inUse} article(s) l'utilisent déjà — ils garderont cette valeur, mais elle ne sera plus proposée pour de nouveaux articles.`
-    : `Supprimer "${mt}" de la liste ?`;
+    ? `Supprimer "${val}" de la liste ? ${inUse} article(s) l'utilisent déjà — ils garderont cette valeur, mais elle ne sera plus proposée pour de nouveaux articles.`
+    : `Supprimer "${val}" de la liste ?`;
   if (!confirm(msg)) return;
-  db.matieres.splice(idx, 1);
+  db[name].splice(idx, 1);
   saveDB();
-  renderMatieres();
-  toast('Matière supprimée', 'ok');
+  renderManagedList(name);
+  toast(`${cfg.label.charAt(0).toUpperCase() + cfg.label.slice(1)} supprimée`, 'ok');
 }
 
-// Options <option> pour un <select> de matière — inclut la valeur actuelle de
-// l'article même si elle a été retirée de la liste depuis, pour ne jamais la
-// changer silencieusement à l'ouverture d'un formulaire.
-function matiereOptions(currentValue) {
-  const list = (db.matieres || []).slice();
+// Options <option> pour un <select> lié à une liste configurable — inclut la valeur
+// actuelle de l'article même si elle a été retirée de la liste depuis (jamais changée
+// silencieusement à l'ouverture d'un formulaire). blankLabel ajoute un choix vide en tête,
+// pour forcer une sélection explicite (ex : famille à la création d'un article).
+function optionsFromList(name, currentValue, blankLabel) {
+  const list = (db[name] || []).slice();
   if (currentValue && !list.includes(currentValue)) list.push(currentValue);
-  return list.map(mt => `<option value="${esc(mt)}" ${mt === currentValue ? 'selected' : ''}>${esc(mt)}${(currentValue===mt && !(db.matieres||[]).includes(mt)) ? ' (hors liste)' : ''}</option>`).join('');
+  let html = blankLabel ? `<option value="" ${!currentValue ? 'selected' : ''}>${esc(blankLabel)}</option>` : '';
+  html += list.map(v => `<option value="${esc(v)}" ${v === currentValue ? 'selected' : ''}>${esc(v)}${(currentValue === v && !(db[name] || []).includes(v)) ? ' (hors liste)' : ''}</option>`).join('');
+  return html;
 }
 
 // ============================================================
