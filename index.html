@@ -120,8 +120,8 @@ tr:hover td{background:#fafbff}
 /* ARTICLE COMBOBOX — recherche + sélection d'un article interne */
 .art-combo{position:relative}
 .art-combo-input{width:100%;padding:4px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px;font-family:inherit}
-.art-combo-list{position:absolute;z-index:80;left:0;right:0;top:100%;margin-top:2px;background:#fff;border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.15);max-height:220px;overflow-y:auto}
-.art-combo-item{padding:6px 10px;cursor:pointer;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.art-combo-list{position:fixed;z-index:2100;background:#fff;border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.15);max-height:240px;overflow-y:auto}
+.art-combo-item{padding:6px 10px;cursor:pointer;font-size:12px;white-space:normal;line-height:1.35}
 .art-combo-item:hover{background:#f0f4f8}
 /* PRICE CELLS */
 .price-cell{font-family:'Courier New',monospace;text-align:right;font-weight:600}
@@ -1905,25 +1905,51 @@ function artComboSearch(comboId, query) {
     : `<div class="art-combo-item muted">Aucun résultat</div>`
   ) + `<div class="art-combo-item muted" style="border-top:1px solid var(--border)" onmousedown="artComboSelect('${comboId}','')">— Non assigné —</div>`;
   list.style.display = '';
+  positionComboList(comboId);
 
-  // Ouvre vers le haut s'il n'y a pas assez de place en dessous (ex: dernière ligne
-  // d'un tableau) — sinon la liste part sous la ligne de flottaison, invisible sans scroll.
+  // Ferme la liste au moindre scroll (page ou conteneur de tableau) : en position
+  // fixed elle ne suit pas le scroll, mieux vaut la refermer que la laisser désalignée.
+  if (!list.dataset.scrollBound) {
+    list.dataset.scrollBound = '1';
+    window.addEventListener('scroll', () => { list.dataset.scrollBound = ''; artComboClose(comboId); }, { capture: true, once: true });
+  }
+}
+
+// Calcule la position de la liste en `position:fixed` (donc jamais rognée par
+// l'overflow:auto d'un conteneur ancêtre comme .table-wrap) : ouvre vers le bas
+// si la place le permet, sinon vers le haut, et reste toujours dans l'écran —
+// y compris pour une liste d'une seule ligne collée en haut de page.
+function positionComboList(comboId) {
   const input = document.getElementById(`combo-${comboId}-input`);
-  if (input) {
-    const rect = input.getBoundingClientRect();
-    const listHeight = Math.min(220, list.scrollHeight || 220);
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const openUp = spaceBelow < listHeight && rect.top > listHeight;
-    list.style.top = openUp ? 'auto' : '100%';
-    list.style.bottom = openUp ? '100%' : 'auto';
-    list.style.marginTop = openUp ? '0' : '2px';
-    list.style.marginBottom = openUp ? '2px' : '0';
+  const list = document.getElementById(`combo-${comboId}-list`);
+  if (!input || !list) return;
+  const rect = input.getBoundingClientRect();
+  const desiredHeight = Math.min(240, list.scrollHeight || 240);
+  const spaceBelow = window.innerHeight - rect.bottom - 8;
+  const spaceAbove = rect.top - 8;
+  const openUp = spaceBelow < desiredHeight && spaceAbove > spaceBelow;
+
+  const listWidth = Math.min(Math.max(rect.width, 380), window.innerWidth - 16);
+  let left = rect.left;
+  if (left + listWidth > window.innerWidth - 8) left = window.innerWidth - listWidth - 8;
+  if (left < 8) left = 8;
+
+  list.style.left = left + 'px';
+  list.style.width = listWidth + 'px';
+  if (openUp) {
+    list.style.maxHeight = Math.max(80, Math.min(240, spaceAbove)) + 'px';
+    list.style.top = 'auto';
+    list.style.bottom = (window.innerHeight - rect.top + 2) + 'px';
+  } else {
+    list.style.maxHeight = Math.max(80, Math.min(240, spaceBelow)) + 'px';
+    list.style.bottom = 'auto';
+    list.style.top = (rect.bottom + 2) + 'px';
   }
 }
 
 function artComboClose(comboId) {
   const list = document.getElementById(`combo-${comboId}-list`);
-  if (list) list.style.display = 'none';
+  if (list) { list.style.display = 'none'; list.dataset.scrollBound = ''; }
 }
 
 function artComboSelect(comboId, articleIdRaw) {
