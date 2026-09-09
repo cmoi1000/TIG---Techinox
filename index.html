@@ -556,7 +556,7 @@ th.has-filter .sort-icon{color:var(--primary);opacity:1}
             <select id="pm-unite" onchange="analyzeProduitsImport()"></select>
           </div>
         </div>
-        <p class="form-hint">* champs obligatoires — les lignes sans famille ni dimension seront ignorées. Pour un <b>nouvel</b> article, la matière doit exister dans la liste fermée (Paramètres → Matières), sinon la ligne est ignorée. La correspondance des colonnes est devinée automatiquement, corrigez-la si besoin.</p>
+        <p class="form-hint">* champs obligatoires — les lignes sans famille ni dimension seront ignorées. Pour un <b>nouvel</b> article, la famille et la matière doivent exister dans les listes fermées (Paramètres → Listes configurables), sinon la ligne est ignorée. La correspondance des colonnes est devinée automatiquement, corrigez-la si besoin.</p>
       </div>
     </div>
 
@@ -2319,11 +2319,16 @@ function analyzeProduitsImport() {
     if (existing) {
       return { code, famille, matiere, section, kg_m: kgm, unite_nomen: unite, status: 'match', matchId: existing.id, include: true };
     }
-    // Nouvel article : la matière doit venir de la liste fermée (Paramètres → Matières),
-    // jamais créée à la volée depuis un fichier importé.
-    if (!matiere || !(db.matieres || []).includes(matiere)) {
+    // Nouvel article : famille et matière doivent venir des listes fermées
+    // (Paramètres → Listes configurables), jamais créées à la volée depuis un fichier importé.
+    const familleConnue = (db.familles || []).includes(famille);
+    const matiereConnue = !!matiere && (db.matieres || []).includes(matiere);
+    if (!familleConnue || !matiereConnue) {
+      const reasons = [];
+      if (!familleConnue) reasons.push(`famille inconnue : "${famille}"`);
+      if (!matiereConnue) reasons.push(matiere ? `matière inconnue : "${matiere}"` : 'matière manquante');
       return { code, famille, matiere, section, kg_m: kgm, unite_nomen: unite, status: 'invalid', include: false,
-        reason: matiere ? `matière inconnue : "${matiere}"` : 'matière manquante' };
+        reason: reasons.join(' ; ') };
     }
     return { code, famille, matiere, section, kg_m: kgm, unite_nomen: unite, status: 'new', include: true };
   });
