@@ -288,23 +288,53 @@ class Handler(BaseHTTPRequestHandler):
                 }]
             }).encode('utf-8')
 
-            req = urllib.request.Request(
-                ANTHROPIC_API_URL,
-                data=anthro_req_body,
-                method='POST',
-                headers={
-                    'Content-Type': 'application/json',
-                    'x-api-key': ANTHROPIC_API_KEY,
-                    'anthropic-version': '2023-06-01'
-                }
-            )
-            try:
-                with urllib.request.urlopen(req, timeout=120) as resp:
-                    self._raw(resp.status, resp.read(), 'application/json')
-            except urllib.error.HTTPError as e:
-                self._raw(e.code, e.read(), 'application/json')
-            except Exception as e:
-                self._json(502, {'error': "Erreur d'appel à l'API Claude : " + str(e)})
+            # Claude renvoie de temps en temps un contenu vide (surcharge momentanée de
+            # l'API, ou 529 overloaded) sur un appel par ailleurs valide — plutôt que de
+            # faire recliquer l'utilisateur 5 à 10 fois, on retente automatiquement côté
+            # serveur avant de renvoyer une erreur. Les erreurs définitives (auth, requête
+            # invalide...) ne sont elles jamais retentées.
+            MAX_ATTEMPTS = 4
+            last_status, last_raw = 502, json.dumps({'error': "Erreur d'appel à l'API Claude (aucune tentative n'a abouti)."}).encode('utf-8')
+            for attempt in range(1, MAX_ATTEMPTS + 1):
+                req = urllib.request.Request(
+                    ANTHROPIC_API_URL,
+                    data=anthro_req_body,
+                    method='POST',
+                    headers={
+                        'Content-Type': 'application/json',
+                        'x-api-key': ANTHROPIC_API_KEY,
+                        'anthropic-version': '2023-06-01'
+                    }
+                )
+                try:
+                    with urllib.request.urlopen(req, timeout=120) as resp:
+                        status, raw = resp.status, resp.read()
+                except urllib.error.HTTPError as e:
+                    status, raw = e.code, e.read()
+                except Exception as e:
+                    self._json(502, {'error': "Erreur d'appel à l'API Claude : " + str(e)}); return
+
+                if status == 200:
+                    text = ''
+                    try:
+                        text = (json.loads(raw).get('content') or [{}])[0].get('text', '')
+                    except Exception:
+                        pass
+                    if text:
+                        self._raw(200, raw, 'application/json'); return
+                    print(f"[extract-facture] tentative {attempt}/{MAX_ATTEMPTS} — réponse Claude sans texte (contenu vide), "
+                          f"{'nouvel essai' if attempt < MAX_ATTEMPTS else 'abandon'}", flush=True)
+                elif status == 529 and attempt < MAX_ATTEMPTS:
+                    print(f"[extract-facture] tentative {attempt}/{MAX_ATTEMPTS} — API Claude surchargée (529), nouvel essai", flush=True)
+                else:
+                    # erreur définitive (auth, requête invalide, etc.) : inutile de retenter
+                    self._raw(status, raw, 'application/json'); return
+
+                last_status, last_raw = status, raw
+                if attempt < MAX_ATTEMPTS:
+                    time.sleep(1.5 * attempt)
+
+            self._raw(last_status, last_raw, 'application/json')
 
         # ── créer / modifier user (admin) ─────────────────────────
         elif path == '/api/users':

@@ -1686,7 +1686,7 @@ Règles impératives :
   const text = data.content?.[0]?.text || '';
 
   if (!text) {
-    throw new Error('Réponse vide de Claude — le PDF est peut-être illisible, protégé ou trop volumineux.');
+    throw new Error('Réponse vide de Claude après plusieurs tentatives automatiques — le PDF est peut-être illisible, protégé ou trop volumineux. Réessayez dans quelques instants, ou avec un autre export du même document.');
   }
 
   // Extract JSON (handle markdown code blocks)
